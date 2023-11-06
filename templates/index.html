@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoGuessr Clone</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #street-view {
+            height: 100%;
+        }
+
+        #map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            height: 300px;
+            border: 2px solid black;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+
+        #country-selector {
+            position: absolute;
+            bottom: 330px;
+            right: 20px;
+            z-index: 5;
+        }
+		
+		#reload-button {
+            position: fixed;
+            bottom: 330px;
+            left: 91.5%;
+            transform: translateX(-50%);
+            padding: 0px 3px;
+            font-size: 16px;
+            cursor: pointer;
+			color: black !important;
+            background-color: #ffffff;
+            border: none;
+            color: white;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="street-view"></div>
+    <div id="map"></div>
+    <select id="country-selector" onchange="updateCountry()">
+        <option value="all">All Countries</option>
+        <option value="us">United States</option>
+        <option value="fr">France</option>
+        <option value="de">Germany</option>
+        <option value="it">Italy</option>
+        <option value="jp">Japan</option>
+        <option value="ru">Russia</option>
+		<option value="at">Austria</option>
+        <option value="de">Germany</option>
+        <option value="pl">Poland</option>
+        <option value="vienna">Wien :^)</option>
+        <option value="belgrade">Beograd</option>
+    </select>
+    <script>
+        function initialize() {
+            updateCountry();
+            fetchStreetView();
+        }
+
+        var radii = [50, 100, 500];  // Search radii in km
+        var radiusIndex = 0;
+        var map;  // Declare map variable
+
+        // Initial bounding boxes for all continents
+        var allBoundingBoxes = [
+            { minLat: 34, maxLat: 71, minLng: -24, maxLng: 40 },  // Europe
+            { minLat: -35, maxLat: 35, minLng: -17, maxLng: 51 },  // Africa
+            { minLat: 24, maxLat: 77, minLng: -169, maxLng: -50 },  // North America
+            { minLat: -10, maxLat: 77, minLng: 29, maxLng: 169 },  // Asia + Australia
+        ];
+
+        var boundingBoxes = allBoundingBoxes;  // Default bounding boxes
+
+        // Country-specific bounding boxes
+        var countryBoundingBoxes = {
+            us: { minLat: 24, maxLat: 49, minLng: -125, maxLng: -66 },
+            fr: { minLat: 41, maxLat: 51, minLng: -5, maxLng: 8 },
+            de: { minLat: 47, maxLat: 55, minLng: 5, maxLng: 15 },
+            it: { minLat: 35, maxLat: 47, minLng: 6, maxLng: 19 },
+            jp: { minLat: 30, maxLat: 45, minLng: 129, maxLng: 146 },
+            ru: { minLat: 41, maxLat: 81, minLng: 19, maxLng: 169 },
+			at: { minLat: 46.4, maxLat: 49, minLng: 9.5, maxLng: 17 },
+            de: { minLat: 47, maxLat: 55, minLng: 5.5, maxLng: 15 },
+            pl: { minLat: 49, maxLat: 54.5, minLng: 14, maxLng: 24 },
+			vienna: { minLat: 48.15, maxLat: 48.25, minLng: 16.3, maxLng: 16.4 },
+            belgrade: { minLat: 44.75, maxLat: 44.85, minLng: 20.35, maxLng: 20.55 }
+        };
+        function updateCountry() {
+            var selectedCountry = document.getElementById('country-selector').value;
+            localStorage.setItem('selectedCountry', selectedCountry);
+            if (selectedCountry === 'all') {
+                boundingBoxes = allBoundingBoxes;
+            } else {
+                boundingBoxes = [countryBoundingBoxes[selectedCountry]];
+            }
+            fetchStreetView();  // Fetch street view for the updated country
+        }
+
+        window.onload = function() {
+            var selectedCountry = localStorage.getItem('selectedCountry');
+            if (selectedCountry) {
+                document.getElementById('country-selector').value = selectedCountry;
+                updateCountry();
+            } else {
+                fetchStreetView();  // Fetch street view if no country is selected
+            }
+        };
+        function initialize() {
+            fetchStreetView();
+        }
+
+        var radii = [50, 100, 500];  // Search radii in km
+        var radiusIndex = 0;
+        var map;  // Declare map variable
+
+        // Define bounding boxes for the continents
+        var boundingBoxes = [
+            { minLat: 34, maxLat: 71, minLng: -24, maxLng: 40 },  // Europe
+            { minLat: -35, maxLat: 35, minLng: -17, maxLng: 51 },  // Africa
+            { minLat: 24, maxLat: 77, minLng: -169, maxLng: -50 },  // North America
+            { minLat: -10, maxLat: 77, minLng: 29, maxLng: 169 },  // Asia + Australia
+        ];
+
+   async function checkLandOrWater(latLng) {
+    var response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latLng.lat()},${latLng.lng()}&key=447586f3e798423981f62c12d8d50653`);
+    var data = await response.json();
+    var selectedCountry = document.getElementById('country-selector').value;
+    if (data.results.length === 0 || data.results[0].components._type === 'ocean' || /ocean|sea|lake|arctic|pacific|norwegian|barents|mediterranean|gulf|aegan|tyrrhenian|atlantic/i.test(data.results[0].formatted)) {
+        console.log('Generated coords found in the sea, moving to another location');
+        return false;
+    }
+    if (selectedCountry !== 'all' && selectedCountry !== 'vienna' && selectedCountry !== 'belgrade') {
+        var countryCode = data.results[0].components.country_code;
+        if (countryCode !== selectedCountry) {
+            console.log(`Generated coords found in ${countryCode}, moving to another location`);
+            return false;
+        }
+    } else if (selectedCountry === 'vienna' && !data.results[0].formatted.includes('Vienna')) {
+        console.log('Generated coords not found in Vienna, moving to another location');
+        return false;
+    } else if (selectedCountry === 'belgrade' && !data.results[0].formatted.includes('Belgrade')) {
+        console.log('Generated coords not found in Belgrade, moving to another location');
+        return false;
+    }
+    console.log(`New location is located in ${data.results[0].formatted}`);
+    return true;
+}
+
+async function fetchCustomBoundary() {
+    var townName = document.getElementById('custom-boundary-input').value;
+    if (!townName) {
+        console.error('Please enter a town name.');
+        return;
+    }
+    
+    try {
+        var response = await fetch(`https://example.com/geojson-boundaries/${encodeURIComponent(townName)}`);
+        if (!response.ok) {
+            console.error('Failed to fetch GeoJSON boundaries:', response.statusText);
+            return;
+        }
+
+        var geojsonData = await response.json();
+        var bbox = geojsonData.bbox;
+        if (!bbox || bbox.length !== 4) {
+            console.error('Invalid GeoJSON bounding box data:', bbox);
+            return;
+        }
+
+        boundingBoxes = [{
+            minLat: bbox[1],
+            maxLat: bbox[3],
+            minLng: bbox[0],
+            maxLng: bbox[2]
+        }];
+        fetchStreetView();  // Fetch street view for the custom boundary
+
+    } catch (error) {
+        console.error('Error fetching or processing GeoJSON boundaries:', error);
+    }
+}
+
+
+        async function fetchStreetView() {
+            var sv = new google.maps.StreetViewService();
+            // Generate random coordinates within the defined bounding boxes
+            var box = boundingBoxes[Math.floor(Math.random() * boundingBoxes.length)];
+            var lat = Math.random() * (box.maxLat - box.minLat) + box.minLat;
+            var lng = Math.random() * (box.maxLng - box.minLng) + box.minLng;
+            var latLng = new google.maps.LatLng(lat, lng);
+            var isLand = await checkLandOrWater(latLng);
+            if (!isLand) {
+                return fetchStreetView();
+            }
+            console.log(`Location ${latLng} generated, finding the closest location within ${radii[radiusIndex]}km`);
+            sv.getPanorama({
+                location: latLng,
+                radius: radii[radiusIndex] * 1000,
+                source: google.maps.StreetViewSource.OUTDOOR
+            }, processSVData);  // Convert km to meters
+        }
+		
+		
+
+        async function processSVData(data, status) {
+		if (status === google.maps.StreetViewStatus.OK) {
+			// Snap the panorama's coordinates to the nearest road.
+			var response = await fetch(`https://roads.googleapis.com/v1/snapToRoads?path=${data.location.latLng.lat()},${data.location.latLng.lng()}&key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY`);
+			var roadData = await response.json();
+			
+			// If the snapped coordinates are significantly different from the panorama's coordinates,
+			// assume the panorama is not located on a road and fetch a new panorama.
+			var snappedLatLng = new google.maps.LatLng(roadData.snappedPoints[0].location.latitude, roadData.snappedPoints[0].location.longitude);
+			if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, snappedLatLng) > 50) {  // Adjust the threshold as needed.
+				console.log('Panorama not located on a road, fetching a new panorama...');
+				return fetchStreetView();
+			}
+
+			// Otherwise, display the panorama and the map.
+			var panorama = new google.maps.StreetViewPanorama(
+				document.getElementById('street-view'),
+				{
+					position: data.location.latLng,
+					pov: {
+						heading: 34,
+						pitch: 10
+					},
+					addressControl: false
+				});
+			console.log(`Pair for location found at ${data.location.latLng}`);
+			initMap(data.location.latLng);
+		} else {
+			if (radiusIndex < radii.length - 1) {
+				radiusIndex++;
+				console.log(`Pair for location not found, finding the closest location within ${radii[radiusIndex]}km`);
+				fetchStreetView();
+			} else {
+				console.error('Street View data not found for this location even after expanding the search radius. Retrying with a new location...');
+				radiusIndex = 0;  // Reset radius index
+				fetchStreetView();  // Generate a new random location
+			}
+		}
+	}
+
+
+function initMap(latLng) {
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: latLng,
+        zoom: 15  // Adjusted zoom level
+    });
+
+    // Add a click event listener to the map
+    map.addListener('click', function(event) {
+        var clickedLatLng = event.latLng;
+        console.log('Clicked coordinates: ', clickedLatLng.toString());
+
+        var distance = google.maps.geometry.spherical.computeDistanceBetween(latLng, clickedLatLng);
+        console.log('Distance from Street View location: ', distance.toFixed(2), ' meters');
+
+        // Dynamic scoring system
+        var maxScore = 10000000;  // The maximum score
+        var lambda = 0.000001;  // Decay constant
+        var score = maxScore * Math.exp(-lambda * distance);
+        score = Math.round(score);  // Round the score to the nearest integer for better readability
+
+        console.log(`Distance is ${distance.toFixed(2)} meters away. You get ${score} points!`);
+    });
+}
+		
+		
+    </script>
+	
+	<script>
+	function reloadLocation() {
+    radiusIndex = 0;
+    fetchStreetView();
+}
+</script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY&callback=initialize"></script>
+	<button id="reload-button" onclick="reloadLocation()">reload</button>
+
+</body>
+</html>
