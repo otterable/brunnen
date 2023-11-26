@@ -3,228 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> 
-    <title>Otterguesser | Ermine.at </title>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <title>Otterguessr | Ermine.at</title>
     <style>
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-        }
-		
-        body, input, button {
-           font-family: 'Roboto', sans-serif;
-        }
-		
-		.guess-marker {
-            background-color: blue;
-            border: 1px solid #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            height: 15px;
-            width: 15px;
-            position: absolute;
-            user-select: none;
-            transform: translate(-50%, -100%);
-            z-index: 10;
-        }
+			font-family: 'Roboto', sans-serif;
+		}
 
-        .actual-marker {
-            background-color: green;
-            border: 1px solid #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            height: 15px;
-            width: 15px;
-            position: absolute;
-            user-select: none;
-            transform: translate(-50%, -100%);
-            z-index: 10;
-        }
+
         
 
         #street-view {
             height: 100%;
         }
+
+    #map {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 400px; /* Initial width */
+    height: 300px; /* Initial height */
+    border: 2px solid black;
+    border-radius: 30px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 5;
+    transition: all 0.3s ease; /* Smooth transition for size and position */
+}
+
+#map:hover {
+    width: 800px; /* Increased width */
+    height: 600px; /* Increased height */
+    bottom: 20px; /* Adjust position to move up */
+    right: 20px; /* Adjust position to move left */
+}
+
 		
-		#street-view .gm-style .gm-fullscreen-control {
-        display: none !important;
-		}
+		/* Hide the Street View Pegman */
+.gm-svpc {
+    display: none !important;
+}
 
-        #map {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 400px;
-            height: 300px;
-            border: 0px solid black;
-			border-radius: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            z-index: 5;
-        }
+/* Hide the Map Type Control */
+.gm-style-mtc {
+    display: none !important;
+}
 
 
-			 .gm-style-cc {
-			display: none !important;
-		}
 
-		/* Hide the "Keyboard shortcuts" link */
-		.gm-bundled-control-on-bottom {
-			display: none !important;
-		}
+/* Hide business POIs - Note: This might not be possible with CSS alone */
 
-		/* Hide the "Report a problem" link specifically */
-		.gm-legal {
-			display: none !important;
-		}
-		
+
         #country-selector {
-            position: absolute;
-            bottom: 320px;
-            right: 10px;
-            z-index: 5;
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-			color: black !important;
-			border:none;
-            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-			box-shadow: 0 0 10px rgba(0,0,0,0.5);
-			border-radius: 30px;
-            color: white;
-            z-index: 10;
-        }
-		
+         position: relative; /* Changed to relative */
+    z-index: 10;
+    background: white;
+    padding: 20px;
+    margin-top: 20px; /* Space between the image and the window */
+    border-radius: 30px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
 		#reload-button {
             position: fixed;
-			top: 60px; /* Adjust this if needed to clear the rounds window */
+        top: 160px; /* Adjust this if needed to clear the rounds window */
             left: 91.5%;
             transform: translateX(-50%);
-            padding: 10px;
+            padding: 0px 3px;
             font-size: 16px;
             cursor: pointer;
 			color: black !important;
-			border:none;
-            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-			box-shadow: 0 0 10px rgba(0,0,0,0.5);
-			border-radius: 30px;
+            background-color: #ffffff;
+            border: none;
             color: white;
-            z-index: 10;
-			display:none;
+            z-index: 5;
         }
 		
 
-    #rounds-window {
-            display: block; /* Changed from none to block */
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10;
-            background: white;
-            padding: 10px;
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-			box-shadow: 0 0 10px rgba(0,0,0,0.5);
 
-        }
-
+#rounds-window {
+    display: block;
+    position: relative; /* Changed to relative */
+    z-index: 10;
+    background: white;
+    padding: 20px;
+    margin-top: 20px; /* Space between the image and the window */
+    border-radius: 30px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
     #score-display {
         position: absolute;
-        top: 60px; /* Adjusted top position */
-        right: 10px;
-        z-index: 10;
+        top: 90px; /* Adjusted top position */
+        right: 20px;
+        z-index: 5;
         background: white;
         padding: 10px;
         border-radius: 30px;
-		background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-		box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
 
     #game-over {
         display: none;
         position: absolute;
-        top: 198px;
-        right: 10px;
-        z-index: 20;
+        top: 20px;
+        right: 20px;
+        z-index: 50;
         background: white;
-        padding: 10px;
+        padding: 20px;
         border-radius: 30px;
-				box-shadow: 0 0 10px rgba(0,0,0,0.5);
-
-        background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
         text-align: center;
     }
-	
-	#timer-display {
-       position: absolute;
-        top: 107px; /* Adjusted top position */
-        right: 10px;
-        z-index: 10;
-        background: white;
-        padding: 10px;
-        border-radius: 30px;
-				box-shadow: 0 0 10px rgba(0,0,0,0.5);
 
-		background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    #street-view .gm-style .gm-fullscreen-control {
+        display: none !important;
     }
+  
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 10; /* High z-index to be on top */
+    display: flex;
+    flex-direction: column; /* Align children in a column */
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* Add padding for spacing */
+}
 
-  #osm-id-input, #load-button {
-    display: block;
-    position: absolute;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
-    padding: 10px;
+
+        #game-end-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: orange;
+            z-index: 30;
+            text-align: center;
+            padding-top: 20%;
+			opacity: 1;
+        }
+
+#rounds-window, #country-selector, #game-over, #score-display {
+    font-weight: bold; /* Make the font bold */
+}
+#rounds-input, 
+button[onclick="startGame()"] {
     border-radius: 30px;
-    border: none; /* Optional: removes the default border */
-    margin-bottom: 5px; /* To add some space between the input and the button */
-			box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
 
-  }
+button[onclick="startGame()"] {
+    background-color: black;  /* Set the background to black */
+    color: white;             /* Set the text color to white */
+    border-radius: 30px;      /* Rounded corners */
+    transition: all 0.3s ease;/* Transition effect for smooth changes */
+}
 
-  #osm-id-input {
-    top: 154px; /* Adjusted top position */
-    right: 125px;
-  }
+button[onclick="startGame()"]:hover {
+    background-color: grey;  /* Background turns green on hover */
+    transform: scale(0.97);    /* Make the button larger */
+}
 
-  #load-button {
-    top: 154px; /* Adjusted top position to place it below the input */
-    right: 10px;
-  }
-  
-  
-  #wiesel-image {
-    position: absolute;
-    bottom: 300px; /* Adjusted bottom position */
-    right: 150px; /* Adjusted right position */
-	max-width: 100px;
-    z-index: 5; /* Adjust z-index as needed */
-  }
-  
-   #description-text {
-    position: absolute;
-    bottom: 10px; /* Align with the bottom of the image */
-    left: 10px; /* Adjusted right position to appear next to the image */
-    z-index: 6; /* Ensures the text is above the image if they overlap */
-    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
-    padding: 10px;
-    border-radius: 10px;
-    width: 300px; /* Set a fixed width for the text box */
-  }
+
 
     </style>
 </head>
 <body>
+ <div id="loading-screen">
+        <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo">
+	<div id="rounds-window">
+        <label for="rounds-input">Choose number of rounds (1-20):</label>
+        <input type="number" id="rounds-input" min="1" max="20" value="5">
+        <button onclick="startGame()">Start Game</button>
+    </div>
+	<select id="country-selector" onchange="updateCountry()">
+        <option value="all">All Countries</option>
+        <option value="us">United States</option>
+        <option value="fr">France</option>
+        <option value="de">Germany</option>
+        <option value="it">Italy</option>
+        <option value="jp">Japan</option>
+        <option value="ru">Russia</option>
+		<option value="at">Austria</option>
+        <option value="de">Germany</option>
+        <option value="pl">Poland</option>
+        <option value="vienna">Wien :^)</option>
+        <option value="belgrade">Beograd</option>
+    </select>
+    </div>
+    <div id="game-end-screen">
+        <p>Here shall be stats.</p>
+    </div>
+	
+<div id="round-end-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; flex-direction: column;">
+    <div id="result-map" style="width: 1000px; height: 800px; border-radius: 30px;"></div>
+    <p id="result-text" style="color: white; font-size: 20px; margin: 20px;">You clicked at XYZ coordinates. The correct coordinates were XYZ. These locations are XYZ meters away.</p>
+    <button onclick="nextRound()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; border-radius: 30px;">Next Round</button>
+</div>
+
+
+
     <div id="street-view"></div>
     <div id="map"></div>
-    <select id="country-selector" onchange="updateCountry()">
-        <option value="all">All Countries</option>
-
-    </select>
+   
     <script>
+	var generatedLocations = [];
+	var userClickedLocations = [];
+
+
         function initialize() {
             updateCountry();
-            fetchStreetView();
-			            showRoundsWindow(); // Manage rounds window display
+			showRoundsWindow(); // Call this function to manage rounds window display
+
         }
 
         var radii = [50, 100, 500];  // Search radii in km
@@ -256,7 +253,6 @@
             belgrade: { minLat: 44.75, maxLat: 44.85, minLng: 20.35, maxLng: 20.55 }
         };
 		
-			
 		function showRoundsWindow() {
             // Check if a game is in progress or not
             var gameInProgress = localStorage.getItem('gameInProgress');
@@ -269,32 +265,28 @@
             }
         }
 		
-        function updateCountry() {
-             var selectedCountry = document.getElementById('country-selector').value;
+
+function updateCountry() {
+    var selectedCountry = document.getElementById('country-selector').value;
     localStorage.setItem('selectedCountry', selectedCountry);
-            if (selectedCountry === 'all') {
-                boundingBoxes = allBoundingBoxes;
-            } else {
-                boundingBoxes = [countryBoundingBoxes[selectedCountry]];
-            }
-            fetchStreetView();  // Fetch street view for the updated country
-        }
+    if (selectedCountry === 'all') {
+        boundingBoxes = allBoundingBoxes;
+    } else {
+        boundingBoxes = [countryBoundingBoxes[selectedCountry]];
+    }
+    // Do NOT call fetchStreetView() here
+}
 
         window.onload = function() {
-			initialize();
-			// Load any custom boundaries from localStorage
-			var storedBoundingBoxes = JSON.parse(localStorage.getItem('countryBoundingBoxes'));
-			if (storedBoundingBoxes) {
-				countryBoundingBoxes = storedBoundingBoxes;
-				// Update the country selector with custom boundaries
-				for (var boundaryId in storedBoundingBoxes) {
-					var newOption = new Option(boundaryId.replace(/-/g, ' '), boundaryId);
-					document.getElementById('country-selector').add(newOption);
-				}
-			}
-		};
+    document.getElementById('loading-screen').style.display = 'flex';
+
+    var selectedCountry = localStorage.getItem('selectedCountry');
+    if (selectedCountry) {
+        document.getElementById('country-selector').value = selectedCountry;
+        updateCountry(); // Only update country selection, don't fetch Street View
+    }
+};
         function initialize() {
-            fetchStreetView();
         }
 
         var radii = [50, 100, 500];  // Search radii in km
@@ -334,154 +326,77 @@
     return true;
 }
 
-    // Add a new function to fetch and load custom boundary data
-        async function loadCustomBoundary(osmId) {
-            try {
-                // Build the Overpass API query URL
-                var query = `[out:json];(relation(${osmId}););out bb;`;
-                var response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch boundary data');
-                }
-
-                var data = await response.json();
-                var elements = data.elements;
-                
-                if (elements.length === 0 || !elements[0].bounds) {
-                    throw new Error('No bounds data available for this OSM ID');
-                }
-
-                var bounds = elements[0].bounds;
-                var bbox = {
-                    minLat: bounds.minlat,
-                    maxLat: bounds.maxlat,
-                    minLng: bounds.minlon,
-                    maxLng: bounds.maxlon
-                };
-
-                // Update the countryBoundingBoxes object
-                countryBoundingBoxes[osmId] = bbox;
-
-                // Add the new option to the country-selector
-                var selector = document.getElementById('country-selector');
-                var newOption = new Option(`OSM ID: ${osmId}`, osmId);
-                selector.add(newOption);
-
-                // Save the bounding boxes to local storage or a global variable if needed
-                // For example: localStorage.setItem('countryBoundingBoxes', JSON.stringify(countryBoundingBoxes));
-                // Or simply use a global variable if the persistence is not needed
-
-                console.log(`Boundary for OSM ID: ${osmId} loaded`);
-            } catch (error) {
-                console.error('Error loading custom boundary:', error);
-            }
-        }
-				
-				// Example function to check if a latLng is within the custom boundary
-		function isWithinCustomBoundary(latLng, boundary) {
-			return (
-				latLng.lat >= boundary.minLat &&
-				latLng.lat <= boundary.maxLat &&
-				latLng.lng >= boundary.minLng &&
-				latLng.lng <= boundary.maxLng
-			);
-		}
-
- // New global variables
-    var preGeneratedLocations = [];
-    var usePreGeneratedLocations = false;
-
-    // Function to pre-generate Street View locations
-    async function preGenerateLocations(count) {
-        for (let i = 0; i < count; i++) {
-            // Call fetchStreetView and wait for it to resolve
-            const location = await fetchStreetView();
-            preGeneratedLocations.push(location);
-        }
-        // Convert the locations array to a JSON string
-        const locationsString = JSON.stringify(preGeneratedLocations);
-        // Trigger a download of the locations file
-        const blob = new Blob([locationsString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'locations.json';
-        a.click();
+async function fetchCustomBoundary() {
+    var townName = document.getElementById('custom-boundary-input').value;
+    if (!townName) {
+        console.error('Please enter a town name.');
+        return;
     }
-
-    // Function to process uploaded locations file
-    document.getElementById('locations-file-input').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (!file) {
+    
+    try {
+        var response = await fetch(`https://example.com/geojson-boundaries/${encodeURIComponent(townName)}`);
+        if (!response.ok) {
+            console.error('Failed to fetch GeoJSON boundaries:', response.statusText);
             return;
         }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const contents = e.target.result;
-            try {
-                preGeneratedLocations = JSON.parse(contents);
-                usePreGeneratedLocations = true;
-                alert('Locations loaded successfully. Start the game to use them.');
-            } catch (error) {
-                alert('Error reading locations file.');
-            }
-        };
-        reader.readAsText(file);
-    });
+
+        var geojsonData = await response.json();
+        var bbox = geojsonData.bbox;
+        if (!bbox || bbox.length !== 4) {
+            console.error('Invalid GeoJSON bounding box data:', bbox);
+            return;
+        }
+
+        boundingBoxes = [{
+            minLat: bbox[1],
+            maxLat: bbox[3],
+            minLng: bbox[0],
+            maxLng: bbox[2]
+        }];
+        fetchStreetView();  // Fetch street view for the custom boundary
+
+    } catch (error) {
+        console.error('Error fetching or processing GeoJSON boundaries:', error);
+    }
+}
+
 
 async function fetchStreetView() {
-
-   if (usePreGeneratedLocations && preGeneratedLocations.length > 0) {
-            const location = preGeneratedLocations.shift(); // Use the next pre-generated location
-            return new Promise(resolve => {
-                processSVData({ location: location, status: google.maps.StreetViewStatus.OK });
-                resolve(location); // Resolve with the location data
-            });
-        } else {
-		
     var sv = new google.maps.StreetViewService();
-
-    // Select the appropriate bounding box based on the user's selection
-    var selectedCountry = document.getElementById('country-selector').value;
-    var box;
-    if (selectedCountry === 'all') {
-        box = allBoundingBoxes[Math.floor(Math.random() * allBoundingBoxes.length)];
-    } else {
-        box = countryBoundingBoxes[selectedCountry];
-    }
-
-    // Generate a random latitude and longitude within the bounding box
+    // Generate random coordinates within the defined bounding boxes
+    var box = boundingBoxes[Math.floor(Math.random() * boundingBoxes.length)];
     var lat = Math.random() * (box.maxLat - box.minLat) + box.minLat;
     var lng = Math.random() * (box.maxLng - box.minLng) + box.minLng;
     var latLng = new google.maps.LatLng(lat, lng);
 
-    // Now instead of finding the closest panorama, we attempt to get a panorama directly at the random location
-    sv.getPanorama({location: latLng, source: google.maps.StreetViewSource.OUTDOOR}, function(data, status) {
+    var isLand = await checkLandOrWater(latLng);
+    if (!isLand) {
+        return fetchStreetView();
+    }
+
+    sv.getPanorama({
+        location: latLng,
+        radius: radii[radiusIndex] * 1000,  // Search radius around the random point
+        source: google.maps.StreetViewSource.OUTDOOR // Focus on outdoor imagery
+    }, function(data, status) {
         if (status === google.maps.StreetViewStatus.OK) {
-            // If a street view is found, set the panorama to the new location
-            var panorama = new google.maps.StreetViewPanorama(
-                document.getElementById('street-view'), {
-                    position: data.location.latLng,
-                    pov: {heading: 34, pitch: 10},
-                    addressControl: false,
-                    disableDefaultUI: true,
-                    showRoadLabels: false
-                }
-            );
-            initMap(data.location.latLng);
-            console.log(`Street View found at ${data.location.latLng}`);
+            // Check if there are links (indicating navigable paths)
+            if (data.links && data.links.length > 0) {
+                processSVData(data, status);
+            } else {
+                // If no links, it's likely a static spot, fetch another location
+                console.log('Static spot found, fetching a new location...');
+                fetchStreetView();
+            }
         } else {
-            // If no street view is found at the random location, try again
-            console.log('Street View not found at this location, trying another location...');
+            console.log('Street View not found, retrying...');
             fetchStreetView();
         }
     });
 }
-}		
-		
 
-      
+		
+		
 
 async function processSVData(data, status) {
     if (status === google.maps.StreetViewStatus.OK) {
@@ -493,31 +408,25 @@ async function processSVData(data, status) {
         if (roadData.snappedPoints && roadData.snappedPoints.length > 0) {
             // If the snapped coordinates are significantly different from the panorama's coordinates,
             // assume the panorama is not located on a road and fetch a new panorama.
-            var snappedLatLng = new google.maps.LatLng(roadData.snappedPoints[0].location.latitude, roadData.snappedPoints[0].location.longitude);
-            if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, snappedLatLng) > 50) {  // Adjust the threshold as needed.
+var snappedLatLng = new google.maps.LatLng(roadData.snappedPoints[0].location.latitude, roadData.snappedPoints[0].location.longitude);
+generatedLocations.push(snappedLatLng); // Store the generated location
+if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, snappedLatLng) > 50) {  // Adjust the threshold as needed.
                 console.log('Panorama not located on a road, fetching a new panorama...');
                 return fetchStreetView();
             }
 
-             // Display the panorama without road names on the street
-			var panorama = new google.maps.StreetViewPanorama(
-				document.getElementById('street-view'),
-				{
-					position: data.location.latLng,
-					pov: {
-						heading: 34,
-						pitch: 10
-					},
-					addressControl: false,
-					disableDefaultUI: true,  // Add this line to disable the default UI
-					showRoadLabels: false, // This property hides the road names on the street
-					linksControl: false, // Optionally hides the arrows for navigation to other streets
-					panControl: false,
-					enableCloseButton: false
-				}
-			);
-
-
+            // Otherwise, display the panorama and the map.
+            var panorama = new google.maps.StreetViewPanorama(
+                document.getElementById('street-view'),
+                {
+                    position: data.location.latLng,
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    },
+                    addressControl: false,
+					showRoadLabels: false  // Hide road labels
+                });
             console.log(`Pair for location found at ${data.location.latLng}`);
             initMap(data.location.latLng);
         } else {
@@ -538,98 +447,134 @@ async function processSVData(data, status) {
 }
 
 
+
 var currentRound = 0;
         var totalRounds = 0;
         var totalScore = 0;
-		var timerId;
-        var timeLeft;
 
-        function startTimer(duration) {
-            clearInterval(timerId);  // Clear any existing timer
-            timeLeft = duration;
-            document.getElementById('timer').textContent = timeLeft;
-            timerId = setInterval(function() {
-                timeLeft--;
-                document.getElementById('timer').textContent = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(timerId);
-                    timeExpired();
-                }
-            }, 1000);
-        }
+function startGame() {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('country-selector').style.display = 'none';
+    totalRounds = document.getElementById('rounds-input').value;
+    totalScore = 0;
+    currentRound = 0;
+    document.getElementById('score').textContent = totalScore;
+    document.getElementById('rounds-window').style.display = 'none';
+    localStorage.setItem('gameInProgress', 'true');
 
-        function timeExpired() {
-            console.log("Time's up! You get 0 points for this round.");
-            alert("Time's up! You get 0 points for this round.");
-            if (++currentRound < totalRounds) {
-                fetchStreetView(); // Proceed to the next round
-                var timeLimit = parseInt(document.getElementById('time-limit-input').value);
-                startTimer(timeLimit);
-            } else {
-                endGame(); // End the game if all rounds are completed
-            }
-        }
-
-  
-
-        function startGame() {
-		totalRounds = document.getElementById('rounds-input').value;
-		totalScore = 0; // Reset total score
-		currentRound = 0; // Reset current round
-		document.getElementById('score').textContent = totalScore;
-		document.getElementById('rounds-window').style.display = 'none';
-		fetchStreetView(); // Fetch a new street view for the first round
-		localStorage.setItem('gameInProgress', 'true'); // Indicate that a game has started
-		var timeLimit = parseInt(document.getElementById('time-limit-input').value);
-        startTimer(timeLimit); // Start the timer with the user-specified time limit
-	}
+    fetchStreetView(); // Add this to start generating Street View locations
+}
 
         function calculateScore(distance) {
             // Implement the exponential scoring logic here
             // For now, let's assume it returns a score between 0 and 10000
-            var score = 100000 * Math.exp(-0.000001 * distance);
+            var score = 10000 * Math.exp(-0.000001 * distance);
             return Math.round(score);
         }
 
-        var guessLocations = []; // To store user's guesses
-        var actualLocations = []; // To store actual locations
+async function getLocationName(latLng) {
+    var response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat()},${latLng.lng()}&key=YOUR_API_KEY`);
+    var data = await response.json();
+    return data.results[0]?.formatted_address || "Unknown location";
+}
 
-        // This function places a marker on the map
-        function placeMarker(map, location, isActual) {
-            var marker = new google.maps.Marker({
-                position: location,
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 5,
-                    fillColor: isActual ? 'green' : 'blue',
-                    fillOpacity: 1,
-                    strokeColor: 'white',
-                    strokeWeight: 1
-                }
-            });
-            return marker;
+async function endGame() {
+    var resultsHtml = "<h3>Game Results</h3><ul>";
+
+    // Create a map to display user-guessed and correct locations
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 0, lng: 0 },
+        zoom: 2
+    });
+
+    for (var i = 0; i < generatedLocations.length; i++) {
+        var genLoc = generatedLocations[i];
+        var userLoc = userClickedLocations[i];
+        if (!genLoc || !userLoc) {
+            console.error("Invalid location data at round", i + 1);
+            continue; // Skip this round
         }
 
-        // Modified version of the endGame function to include the locations summary
-        function endGame() {
+        var genLocName = await getLocationName(genLoc);
+        var userLocName = await getLocationName(userLoc);
+        var distance = calculateDistance(genLoc.lat(), genLoc.lng(), userLoc.lat(), userLoc.lng());
+
+        resultsHtml += `<li>Round ${i + 1}: 
+            Generated Location - <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a> (${genLoc.lat().toFixed(5)}, ${genLoc.lng().toFixed(5)}), 
+            Your Guess - <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a> (${userLoc.lat().toFixed(5)}, ${userLoc.lng().toFixed(5)}), 
+            Distance Off: ${distance.toFixed(2)} km</li>`;
+
+        // Add markers with circles on the map
+        var userMarker = new google.maps.Marker({
+            position: userLoc,
+            map: map,
+            label: {
+                text: (i + 1).toString(), // Round number
+                color: '#000000', // Text color
+                fontWeight: 'bold', // Make text bold
+                fontSize: '14px' // Text size
+            },
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: "#FF0000",
+                fillOpacity: 0.4,
+                strokeWeight: 1
+            }
+        });
+
+        var correctMarker = new google.maps.Marker({
+            position: genLoc,
+            map: map,
+            label: {
+                text: (i + 1).toString(), // Round number
+                color: '#000000', // Text color
+                fontWeight: 'bold', // Make text bold
+                fontSize: '14px' // Text size
+            },
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: "#00FF00",
+                fillOpacity: 0.4,
+                strokeWeight: 1
+            }
+        });
+    }
+
+    resultsHtml += "</ul>";
+    document.getElementById('game-end-screen').innerHTML = resultsHtml;
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('total-points').textContent = totalScore;
     localStorage.setItem('gameInProgress', 'false'); // Indicate that the game has ended
-    clearInterval(timerId);  // Clear the timer
-
-    var locationsSummary = "";
-    for (var i = 0; i < actualLocations.length; i++) {
-        var actualName = (actualLocations[i] && actualLocations[i].name) ? actualLocations[i].name : "N/A";
-        var actualCoords = (actualLocations[i] && actualLocations[i].coords) ? actualLocations[i].coords : "N/A";
-        var guessName = (guessLocations[i] && guessLocations[i].name) ? guessLocations[i].name : "N/A";
-        var guessCoords = (guessLocations[i] && guessLocations[i].coords) ? guessLocations[i].coords : "N/A";
-        locationsSummary += "Round " + (i + 1) + ": Actual: " + actualName + ", " + actualCoords + "<br>Your guess: " + guessName + ", " + guessCoords + "<br>";
-    }
-    document.getElementById('locations-summary').innerHTML = locationsSummary;
+    document.getElementById('game-end-screen').style.display = 'block'; // Show game end screen
+    document.getElementById('map-container').style.display = 'block'; // Show the map container
 }
-		
-  function restartGame() {
+
+document.getElementById('game-end-screen').addEventListener('click', function() {
+    this.style.display = 'none';  // Hide the game-over screen
+    document.getElementById('loading-screen').style.display = 'flex'; // Show the loading screen
+    document.getElementById('map-container').style.display = 'none'; // Hide the map container when game results are closed
+});
+
+function restartGame() {
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('rounds-window').style.display = 'block';
+    localStorage.setItem('gameInProgress', 'false'); // Ensure correct state is set
+    showRoundsWindow(); // Show rounds window after game restart
+}
+
+
+
+
+
+
+      document.getElementById('game-end-screen').addEventListener('click', function() {
+	  this.style.display = 'none';  // Hide the game-over screen
+      document.getElementById('loading-screen').style.display = 'flex'; // Show the loading screen
+});
+
+        function restartGame() {
             document.getElementById('game-over').style.display = 'none';
             document.getElementById('rounds-window').style.display = 'block';
             localStorage.setItem('gameInProgress', 'false'); // Ensure correct state is set
@@ -638,61 +583,158 @@ var currentRound = 0;
 		
 		        window.onload = initialize;
 
-    
-function initMap(latLng) {
-    // If latLng is not provided, initialize it with a default value
-    if (!latLng) {
-        latLng = new google.maps.LatLng(0, 0); // Default to coordinates 0,0
+
+function initMap() {
+    var fixedLatLng = new google.maps.LatLng(48.8566, 2.3522); // Example fixed coordinates (Paris, France)
+
+    var mapOptions = {
+        center: fixedLatLng,       // Fixed center for the map
+        zoom: 2,                  // Fixed zoom level
+        fullscreenControl: false,  // Keep the fullscreen control disabled
+        zoomControl: false,        // Disable zoom controls
+        streetViewControl: false,  // Disable Street View Pegman
+        mapTypeControl: false,     // Disable map type (satellite/normal) control
+        styles: [{                 // Style to hide business POIs (if needed)
+            featureType: "poi.business",
+            elementType: "labels",
+            stylers: [{ visibility: "off" }]
+        }]
+    };
+
+    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+    // Add a click event listener to the map
+map.addListener('click', function(event) {
+    if (currentRound >= totalRounds) {
+        endGame();
+        return;
     }
 
-    // Check if the selected country is Vienna and update latLng if it is
-    var selectedCountry = document.getElementById('country-selector').value;
-    if (selectedCountry === 'vienna') {
-        latLng = new google.maps.LatLng(48.2082, 16.3738); // Vienna's coordinates
-    }
+    var clickedLatLng = event.latLng;
+    userClickedLocations.push(clickedLatLng); // Store the user clicked location
+    var generatedLatLng = generatedLocations[currentRound]; // The correct location for the current round
 
-    // Initialize the map with the given or updated latLng
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: latLng,
-        zoom: selectedCountry === 'vienna' ? 10 : 1, // Zoom level 15 for Vienna, 1 otherwise
-        fullscreenControl: false,
-        streetViewControl: false,
-        zoomControl: false,
-        mapTypeControl: false,
-        styles: [
-            {
-                featureType: "poi",
-                elementType: "labels",
-                stylers: [{ visibility: "off" }]
-            }
-        ]
+    endRound(clickedLatLng, generatedLatLng); // Show the results overlay
+
+    // Increment round and update score here, but don't fetch new Street View yet
+    var score = calculateScore(google.maps.geometry.spherical.computeDistanceBetween(generatedLatLng, clickedLatLng));
+    totalScore += score;
+    document.getElementById('score').textContent = totalScore;
+    currentRound++;
+});
+
+}
+
+		function calculateDistance(lat1, lng1, lat2, lng2) {
+    var earthRadiusKm = 6371;
+
+    var dLat = degreesToRadians(lat2-lat1);
+    var dLng = degreesToRadians(lng2-lng1);
+
+    lat1 = degreesToRadians(lat1);
+    lat2 = degreesToRadians(lat2);
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLng/2) * Math.sin(dLng/2) * Math.cos(lat1) * Math.cos(lat2); 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return earthRadiusKm * c;
+}
+
+function degreesToRadians(degrees) {
+    return degrees * Math.PI / 180;
+}
+
+function endRound(userLatLng, correctLatLng) {
+    var distance = calculateDistance(userLatLng.lat(), userLatLng.lng(), correctLatLng.lat(), correctLatLng.lng());
+    document.getElementById('result-text').innerText = `You clicked at (${userLatLng.lat().toFixed(5)}, ${userLatLng.lng().toFixed(5)}). The correct coordinates were (${correctLatLng.lat().toFixed(5)}, ${correctLatLng.lng().toFixed(5)}). These locations are ${Math.round(distance)} meters away.`;
+
+    displayResultMap(userLatLng, correctLatLng);
+    document.getElementById('round-end-overlay').style.display = 'flex';
+}
+
+function nextRound() {
+    document.getElementById('round-end-overlay').style.display = 'none';
+    fetchStreetView();
+}
+
+function displayResultMap(userLatLng, correctLatLng) {
+    var map = new google.maps.Map(document.getElementById('result-map'), {
+        center: userLatLng,
+        zoom: 2 // Set the zoom level to 1
     });
 
-        // Add a click event listener to the map
-        map.addListener('click', function(event) {
-            if (currentRound >= totalRounds) {
-                endGame();
-                return;
-            }
+    new google.maps.Marker({
+        position: userLatLng,
+        map: map,
+        label: {
+            text: 'Your Otterguess', // Text for the label
+            color: '#000000', // Text color
+            fontWeight: 'bold', // Make text bold
+            fontSize: '14px' // Text size
+        },
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#FF0000",
+            fillOpacity: 0.4,
+            strokeWeight: 1
+        }
+    });
 
-            var clickedLatLng = event.latLng;
-            var distance = google.maps.geometry.spherical.computeDistanceBetween(latLng, clickedLatLng);
-            var score = calculateScore(distance);
-            totalScore += score;
-            document.getElementById('score').textContent = totalScore;
-            console.log(`Round ${currentRound + 1}/${totalRounds}: ${score} points`);
+    new google.maps.Marker({
+        position: correctLatLng,
+        map: map,
+        label: {
+            text: 'Actual location', // Text for the label
+            color: '#000000', // Text color
+            fontWeight: 'bold', // Make text bold
+            fontSize: '14px' // Text size
+        },
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#00FF00",
+            fillOpacity: 0.4,
+            strokeWeight: 1
+        }
+    });
+}
 
-            if (++currentRound < totalRounds) {
-                fetchStreetView(); // Proceed to the next round
-                var timeLimit = parseInt(document.getElementById('time-limit-input').value);
-                startTimer(timeLimit); // Reset the timer for the next round
-            } else {
-                endGame(); // End the game if all rounds are completed
-            }
-        });
+async function getLocationName(latLng) {
+    var response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat()},${latLng.lng()}&key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY`);
+	var data = await response.json();
+    
+    if (data.results.length > 0) {
+        var result = data.results[0];
+        var addressComponents = result.address_components;
+        var locality = addressComponents.find(c => c.types.includes('locality'))?.long_name;
+        var adminArea = addressComponents.find(c => c.types.includes('administrative_area_level_1'))?.long_name;
+        var country = addressComponents.find(c => c.types.includes('country'))?.long_name;
+
+        var address = [locality, adminArea, country].filter(Boolean).join(", ");
+        return address || result.formatted_address;
+    } else {
+        return "Unknown location";
     }
-		
+}
 
+
+async function endRound(userLatLng, correctLatLng) {
+    var userLocationName = await getLocationName(userLatLng);
+    var correctLocationName = await getLocationName(correctLatLng);
+    var distance = calculateDistance(userLatLng.lat(), userLatLng.lng(), correctLatLng.lat(), correctLatLng.lng());
+
+		document.getElementById('result-text').innerHTML = `
+        You clicked at <a href="https://www.google.com/maps/search/?api=1&query=${userLatLng.lat()},${userLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${userLocationName}</a>. 
+        The correct location was <a href="https://www.google.com/maps/search/?api=1&query=${correctLatLng.lat()},${correctLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${correctLocationName}</a>. 
+        These locations are ${Math.round(distance)} meters away.`;
+
+    displayResultMap(userLatLng, correctLatLng);
+    document.getElementById('round-end-overlay').style.display = 'flex';
+}
+
+
+		
     </script>
 	
 	<script>
@@ -702,18 +744,9 @@ function initMap(latLng) {
 }
 </script>
 
-     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY&callback=initialize"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY&callback=initialize"></script>
 	<button id="reload-button" onclick="reloadLocation()">reload</button>
-    <div id="rounds-window">
-        <label for="rounds-input">Choose number of rounds (1-20):</label>
-        <input type="number" id="rounds-input" min="1" max="20" value="5">
-            <label for="time-limit-input">Set time limit per round (5-600s):</label>
-        <input type="number" id="time-limit-input" min="5" max="600" value="30">
-        <button onclick="startGame()">Start Game</button>
-    </div>
-
-    <div id="timer-display">Time Left: <span id="timer">0</span>s</div>
-
+  
 
     <div id="score-display">Points: <span id="score">0</span></div>
 
@@ -721,30 +754,5 @@ function initMap(latLng) {
         <p>Game over. You won <span id="total-points">0</span> points!</p>
         <button onclick="restartGame()">Play Again</button>
     </div>
-	
-  <input type="text" id="osm-id-input" placeholder="Enter an OSM ID">
-  <button id="load-button" onclick="loadCustomBoundary(document.getElementById('osm-id-input').value)">
-    Load Boundary
-  </button>
-
-  <img id="wiesel-image" src="static/wieselspin.gif" alt="Wiesel">
-
-	 <div id="description-text">
-    <strong>Otterguesser</strong><br>
-    A WIP version of geoguesser, that intends to be lightweight, better, and free.<br>
-    South America is disabled out of principle.<br><br>
-    <strong>Current features:</strong><br>
-    - Customize number of rounds, timer, location<br>
-    - Use a custom OSM ID data for custom generation boundaries<br><br>
-    <strong>Future features:</strong><br>
-    - Multiplayer via pregenerated locations (via .json files, generate/download/upload)<br>
-    - Ability to log scores<br>
-    - Logging of all generated locations (via a toggleable layer of dots on the small map, with optional .json export)<br><br>
-    <strong>Current issues:</strong><br>
-    - Generation within boundaries isn't precise<br>
-    - Boundaries are boxes, and not exact polylines<br>
-    - Slow generation of big areas, because of the issue above<br>
-  </div>
-
 </body>
 </html>
