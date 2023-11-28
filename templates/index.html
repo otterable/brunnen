@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,7 +239,8 @@ button[onclick="startGame()"]:hover {
 <body>
  <div id="loading-screen">
         <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
-	<div id="rounds-window">
+<span style="color: white; margin-bottom: -20px"><h2>Classic mode - randomly generated locations</h2></span>
+				<div id="rounds-window">
         <label for="rounds-input">Choose number of rounds (1-20):</label>
         <input type="number" id="rounds-input" min="1" max="20" value="5">
         <button onclick="startGame()">Start Game</button>
@@ -262,6 +264,21 @@ button[onclick="startGame()"]:hover {
         <option value="vienna">Wien :^)</option>
         <option value="belgrade">Beograd</option>
     </select>
+	
+<span style="color: white; margin-bottom: -20px"><h2>Custom mode - pregenerated locations from a file</h2></span>
+
+<div class="styled-window">
+    <input type="file" id="file-input" />
+    <button onclick="loadGameFromFile()">Load Game from File</button>
+</div>
+
+	
+<span style="color: white;">v28.11.2023, f_otterguessr_a6</span>
+<a href="https://ko-fi.com/otterable" target="_blank">
+    <img height="36" style="border:0px;height:20px;" src="static/donate.png" border="0" alt="Support on Ko-fi" />
+</a>
+
+
 
 
     </div>
@@ -269,7 +286,10 @@ button[onclick="startGame()"]:hover {
         <p>Here shall be stats.</p>
     </div>
 	
-	
+	<div id="loading-icon" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index:10000">
+    <img src="static/wieselspin.gif" alt="Loading...">
+	</div>
+
 	
 <div id="round-end-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; flex-direction: column;">
     <div id="result-map" style="width: 1000px; height: 700px; border-radius: 30px;"></div>
@@ -298,6 +318,46 @@ button[onclick="startGame()"]:hover {
 			showRoundsWindow(); // Call this function to manage rounds window display
 
         }
+		
+		function loadGameFromFile() {
+    var fileInput = document.getElementById('file-input');
+    var file = fileInput.files[0];
+    if (!file) {
+        console.error('No file selected.');
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var contents = e.target.result;
+        try {
+            var data = JSON.parse(contents);
+            setupGameFromFile(data);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function setupGameFromFile(data) {
+    if (data.totalRounds && data.roundLength && data.locations) {
+        // Set total rounds and round length
+        document.getElementById('rounds-input').value = data.totalRounds;
+        document.getElementById('timer-duration').value = data.roundLength;
+        timePerRound = data.roundLength;
+
+        // Set locations for the game
+        generatedLocations = data.locations.map(loc => new google.maps.LatLng(loc.lat, loc.lng));
+
+        console.log(`File ${data.randomFileName} loaded. Timer is ${data.roundLength} seconds, there are ${data.totalRounds} rounds, the locations are:`);
+        data.locations.forEach((loc, index) => console.log(`Round ${index + 1}: ${loc.lat}, ${loc.lng}`));
+
+        startGame(); // Start the game with loaded settings
+    } else {
+        console.error('Invalid game data from file.');
+    }
+}
 
         var radii = [50, 100, 500];  // Search radii in km
         var radiusIndex = 0;
@@ -443,12 +503,24 @@ async function fetchCustomBoundary() {
 }
 
 
+
 async function fetchStreetView() {
-   if (!isGameActive) {
+
+    if (!isGameActive) {
         console.log('Game has ended. No new Street View will be fetched.');
         return; // Exit the function if the game is not active
     }
-    console.log("Fetching Street View for round: " + (currentRound + 1));
+
+    // Use preloaded location if available
+    if (generatedLocations && generatedLocations.length > currentRound) {
+        let latLng = generatedLocations[currentRound];
+        console.log(`Round ${currentRound + 1}: Generating location from file ${gameData.randomFileName}, location coordinates: ${latLng.lat()}, ${latLng.lng()}`);
+        showStreetView(latLng);
+        return;
+    }
+    console.log("Fetching Street View for round:", currentRound + 1);
+    document.getElementById('loading-icon').style.display = 'block';  // Show loading icon
+    console.log("Game loading, wieselspin added");
     var sv = new google.maps.StreetViewService();
     // Generate random coordinates within the defined bounding boxes
     var box = boundingBoxes[Math.floor(Math.random() * boundingBoxes.length)];
@@ -478,6 +550,29 @@ async function fetchStreetView() {
         } else {
             console.log('Street View not found, retrying...');
             fetchStreetView();
+        }
+    });
+}
+function showStreetView(latLng) {
+    var sv = new google.maps.StreetViewService();
+    sv.getPanorama({
+        location: latLng,
+        radius: 50,  // Adjust this radius if needed
+        source: google.maps.StreetViewSource.OUTDOOR
+    }, function(data, status) {
+        if (status === google.maps.StreetViewStatus.OK) {
+            var panorama = new google.maps.StreetViewPanorama(
+                document.getElementById('street-view'), {
+                    position: latLng,
+                    pov: { heading: 34, pitch: 10 },
+                    addressControl: false,
+                    showRoadLabels: false
+                });
+            startTimer();
+            initMap(data.location.latLng);
+	
+        } else {
+            console.error('Street View not found for the given location.');
         }
     });
 }
@@ -584,7 +679,14 @@ if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, 
             fetchStreetView();  // Generate a new random location
         }
     }
-}
+				gameData.locations.push({ // Save location data
+                lat: data.location.latLng.lat(),
+                lng: data.location.latLng.lng()
+            });
+			  document.getElementById('loading-icon').style.display = 'none';
+			  console.log("Streetview found (location saved), wieselspin hidden."); // Debugging log
+              console.log('Location saved:', gameData.locations[gameData.locations.length - 1]); // Debugging
+        }
 
 
 
@@ -603,9 +705,43 @@ var userClickedLocations = [];
 var isGameActive = false; // New variable to track the game state
 
 
+       var gameData = {
+            locations: [],
+            randomFileName: '',
+            totalRounds: 0,
+            roundLength: 0 // New property to store round length
+        };
+
+        function generateRandomFileName() {
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var fileName = '';
+            for (var i = 0; i < 16; i++) {
+                fileName += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return fileName + '.json';
+        }
+
+        function saveGameData() {
+            var blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = gameData.randomFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+		
+		
 function startGame() {
     isGameActive = true; // Set to true when a new game starts
-    generatedLocations = []; // Reset generated locations for new game
+    if (!generatedLocations || generatedLocations.length === 0) {
+        generatedLocations = []; // Reset generated locations only if none are preloaded
+        gameData.randomFileName = generateRandomFileName(); // Generate random file name
+        console.log('Game started with random locations.');
+    } else {
+        console.log(`Game started with preloaded locations from file ${gameData.randomFileName}. No file will be generated.`);
+        gameData.randomFileName = ''; // Clear the randomFileName to disable file generation
+    }
     userClickedLocations = []; // Reset user clicked locations for new game
     totalRounds = document.getElementById('rounds-input').value; // Set totalRounds before updating the display
     currentRound = 0; // Reset currentRound to 0
@@ -618,9 +754,12 @@ function startGame() {
     document.getElementById('country-selector').style.display = 'none';
     document.getElementById('rounds-window').style.display = 'none';
     localStorage.setItem('gameInProgress', 'true');
+    gameData.totalRounds = totalRounds; // Store total rounds
+    gameData.roundLength = timePerRound; // Store round length
+    console.log('Total rounds:', gameData.totalRounds, 'Round length:', gameData.roundLength); // Debugging
     fetchStreetView();
-    console.log('Game started with ' + totalRounds + ' rounds.');
 }
+
 
         function calculateScore(distance) {
        var score = 10000 * Math.exp(-0.000001 * distance);
@@ -641,7 +780,7 @@ async function endGame() {
         center: { lat: 0, lng: 0 },
         zoom: 2
     });
-	
+
     for (var i = 0; i < generatedLocations.length; i++) {
         var genLoc = generatedLocations[i];
         var userLoc = userClickedLocations[i];
@@ -658,6 +797,7 @@ async function endGame() {
             ✔️ - <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a>, 
             ❌ - <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a>, 
             📏 - ${distance.toFixed(2)} km</li>`;
+    
 
         // Add markers with circles on the map
         var userMarker = new google.maps.Marker({
@@ -698,7 +838,8 @@ async function endGame() {
     }
 
    
-	resultsHtml += "</ul>";
+
+   resultsHtml += "</ul>";
     document.getElementById('game-results').innerHTML = resultsHtml;
     document.getElementById('score-display').style.display = 'block';
     document.getElementById('game-over').style.display = 'block';
@@ -706,8 +847,26 @@ async function endGame() {
     document.getElementById('total-points').textContent = totalScore;
     localStorage.setItem('gameInProgress', 'false');
     console.log('Game ended with total score: ' + totalScore);
-}
 
+    // Save game data to a file if started with randomly generated locations
+	if (gameData.randomFileName) {
+        gameData.locations = generatedLocations;
+        saveGameData(); // Save the game data to a file
+        console.log('Game data saved to file:', gameData.randomFileName); // Debugging
+    } else {
+        console.log('Game started with preloaded locations, no file will be downloaded.');
+    }
+	
+
+    
+	
+   // Reset game data and generated locations
+    generatedLocations = [];
+    gameData = { locations: [], randomFileName: '', totalRounds: 0, roundLength: 0 };
+    console.log('Game ended, data cache deleted.'); // Debugging message
+
+
+}	
 document.getElementById('game-end-screen').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('loading-screen').style.display = 'flex';
