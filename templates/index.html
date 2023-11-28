@@ -21,6 +21,19 @@
         #street-view {
             height: 100%;
         }
+		#launch-custom-mode {
+    background-color: #ffffff; /* Green background */
+    color: black; /* White text */
+    padding: 15px 32px; /* Padding for size */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* No underline */
+    display: inline-block; /* Inline block display */
+    font-size: 16px; /* Font size */
+    margin: 4px 2px; /* Margin around the button */
+    cursor: pointer; /* Cursor changes to pointer on hover */
+    border-radius: 30px; /* Rounded corners */
+}
+
 
     #map {
     position: absolute;
@@ -45,7 +58,6 @@
 		
 		/* Hide the Street View Pegman */
 .gm-svpc {
-    display: none !important;
 }
 
 /* Hide the Map Type Control */
@@ -138,6 +150,26 @@
         display: none !important;
     }
   
+.overlay {
+    position: fixed; /* Stay in place */
+    z-index: 10000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0,0,0,0.2); /* Black background with 0.2 opacity */
+    display: flex; /* Use Flexbox to center the child */
+    align-items: center; /* Align vertically at center */
+    justify-content: center; /* Align horizontally at center */
+    overflow-y: auto; /* Enable scroll if needed */
+}
+
+#custom-location-editor {
+    background-color: #000000;
+    padding: 20px;
+    width: 80%; /* Could be more or less, depending on screen size */
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: adds a subtle shadow for better visibility */
+}
 #loading-screen {
     position: fixed;
     top: 0;
@@ -151,6 +183,7 @@
     align-items: center;
     justify-content: center;
     padding: 10px; /* Add padding for spacing */
+	overflow-y: auto;
 }
 
 
@@ -246,8 +279,8 @@ button[onclick="startGame()"]:hover {
         <button onclick="startGame()">Start Game</button>
     </div>
 	<div id="timer-settings" class="styled-window">
-        <label for="timer-duration">Set timer duration (10s to 600s):</label>
-        <input type="number" style="border-radius: 30px;" id="timer-duration" min="10" max="600" value="30">
+        <label for="timer-duration">Set timer duration (10s to 1200s):</label>
+        <input type="number" style="border-radius: 30px;" id="timer-duration" min="10" max="600" value="120">
         <button onclick="setTimerDuration()" class="styled-button">Set Timer</button>
     </div>
 	<select id="country-selector" onchange="updateCountry()">
@@ -273,13 +306,20 @@ button[onclick="startGame()"]:hover {
 </div>
 
 	
-<span style="color: white;">v28.11.2023, f_otterguessr_a6</span>
+<span style="color: white;">v28.11.2023b, f_otterguessr_a8</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
-    <img height="36" style="border:0px;height:20px;" src="static/donate.png" border="0" alt="Support on Ko-fi" />
+    <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
 
 
-
+<button id="launch-custom-mode" onclick="launchCustomGenerationMode()">Launch Custom Generation Mode</button>
+<div id="custom-location-editor" class="overlay" style="display: none;">
+    <span style="color: white; margin-bottom: -20px"><h4>Open browser console (F12) for instructions. Proper UI to be implemented later.</h4></span>
+    <button onclick="saveLocation()">Save Current Location</button>
+    <button id="download-custom-file" onclick="downloadCustomLocationsFile()" style="display: block;">Download Custom Locations File</button>
+    <div id="custom-map" style="width: 1000px; height: 700px;"></div>
+    <button onclick="toggleCustomGenerationMode()">Close</button>
+</div>
 
     </div>
     <div id="game-end-screen">
@@ -579,16 +619,16 @@ function showStreetView(latLng) {
 
 		
 		var timer;
-        var timePerRound = 30; // Default time per round in seconds
+        var timePerRound = 120; // Default time per round in seconds
 
         function setTimerDuration() {
         var newDuration = parseInt(document.getElementById('timer-duration').value);
-        if (newDuration >= 10 && newDuration <= 600) {
+        if (newDuration >= 10 && newDuration <= 1200) {
             timePerRound = newDuration;
             console.log('Timer duration set to:', timePerRound); // Debugging
             alert('Timer duration set to ' + timePerRound + ' seconds.'); // Popup message
         } else {
-            alert('Please enter a duration between 10 and 600 seconds.');
+            alert('Please enter a duration between 10 and 1200 seconds.');
         }
     }
 
@@ -1089,7 +1129,128 @@ async function endRound(userLatLng, correctLatLng) {
 
 		
     </script>
-	
+	<script>
+    var customLocations = []; // Array to hold custom locations
+    var customTotalRounds = 0; // Total number of rounds for custom mode
+	var currentLatLng; // Global variable to store the current location
+	var customMap; // This will hold the map instance
+
+    // Function to launch the Custom Location Editor Mode
+    function launchCustomGenerationMode() {
+        document.getElementById('custom-location-editor').style.display = 'block'; // Show the map editor
+        initCustomMap(); // Initialize the custom map with Street View enabled
+    }
+
+
+    // Initialize the custom map for location selection
+function initCustomMap() {
+    var mapOptions = {
+        center: { lat: 48.8566, lng: 2.3522 },
+        zoom: 3,
+        streetViewControl: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    var customMap = new google.maps.Map(document.getElementById('custom-map'), mapOptions);
+
+    // Update the current location when the map is clicked
+    customMap.addListener('click', function(event) {
+        currentLatLng = event.latLng;
+        console.log('Use the stickman icon to switch to street view mode. Locations generated using Map Click will be invalid! BUG: Currently, the first street view will always result in a bug. I will fix this soon. // (Map Click):', currentLatLng.lat(), currentLatLng.lng());
+    });
+
+    // Listener for changes in Street View
+    var streetView = customMap.getStreetView();
+    google.maps.event.addListener(streetView, 'visible_changed', function() {
+        if (streetView.getVisible()) {
+            // Update the location when Street View is entered
+            currentLatLng = streetView.getPosition();
+            console.log('Current location SUCCESSFULLY updated. If you are satisfied with it, press "Save location". If not, continue browsing street view, until you are happy with the location. (Street View Entered):', currentLatLng.lat(), currentLatLng.lng());
+
+            // Listener for changes in Street View position
+            google.maps.event.addListener(streetView, 'position_changed', function() {
+                currentLatLng = streetView.getPosition();
+                console.log('Current location SUCCESSFULLY updated. If you are satisfied with it, press "Save location". If not, continue browsing street view, until you are happy with the location. (Street View Movement):', currentLatLng.lat(), currentLatLng.lng());
+            });
+        }
+    });
+}
+
+
+
+function saveLocation() {
+    if (currentLatLng) {
+        customLocations.push(currentLatLng); // Save the current location to the array
+        console.log('Location saved into the custom games file:', currentLatLng.lat(), currentLatLng.lng()); // Log the saved location
+
+        // Create a marker for the saved location
+        new google.maps.Marker({
+            position: currentLatLng,
+            map: customMap
+        });
+
+        // Reset currentLatLng
+        currentLatLng = null;
+
+        // Check if the number of selected locations equals the number of rounds
+        if (customLocations.length === customTotalRounds) {
+            document.getElementById('download-custom-file').style.display = 'block';
+        }
+    } else {
+        console.log('No location selected to save.');
+    }
+}
+
+    // Function to set the total number of rounds for custom mode
+    function setCustomTotalRounds() {
+        customTotalRounds = parseInt(document.getElementById('custom-rounds-input').value);
+        console.log('Custom Total Rounds set to:', customTotalRounds); // Debugging
+    }
+
+    // Function to generate and download the custom locations file
+function downloadCustomLocationsFile() {
+    // Set the total number of rounds based on the number of saved locations
+    customTotalRounds = customLocations.length;
+
+    var customGameData = {
+        locations: customLocations.map(loc => ({ lat: loc.lat(), lng: loc.lng() })),
+        randomFileName: generateRandomFileName(), // Use the existing function to generate file name
+        totalRounds: customTotalRounds.toString(),
+        roundLength: 30 // Default round length, can be modified if needed
+    };
+
+    var blob = new Blob([JSON.stringify(customGameData)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = customGameData.randomFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Debugging: Log the file name and the number of rounds
+    console.log(`Custom locations file ${customGameData.randomFileName} downloaded, containing ${customTotalRounds} rounds.`);
+
+    // Reset customLocations array after download
+    customLocations = [];
+}
+
+function launchCustomGenerationMode() {
+    var editor = document.getElementById('custom-location-editor');
+    if (editor.style.display === "block") {
+        editor.style.display = "none";
+    } else {
+        editor.style.display = "block";
+        initCustomMap(); // Initialize the custom map with Street View enabled
+    }
+}
+
+function toggleCustomGenerationMode() {
+    var editor = document.getElementById('custom-location-editor');
+    editor.style.display = "none";
+}
+
+</script>
+
 	<script>
 	function reloadLocation() {
     radiusIndex = 0;
