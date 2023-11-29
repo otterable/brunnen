@@ -34,6 +34,18 @@
     border-radius: 30px; /* Rounded corners */
 }
 
+	#toggle-streetview-movement {
+    background-color: #ffffff; /* Green background */
+    color: black; /* White text */
+    padding: 10px; /* Padding for size */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* No underline */
+    display: inline-block; /* Inline block display */
+    font-size: 16px; /* Font size */
+    margin-top: 10px; /* Margin around the button */
+    cursor: pointer; /* Cursor changes to pointer on hover */
+    border-radius: 30px; /* Rounded corners */
+}
 
     #map {
     position: absolute;
@@ -274,15 +286,15 @@ button[onclick="startGame()"]:hover {
         <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
 <span style="color: white; margin-bottom: -20px"><h2>Classic mode - randomly generated locations</h2></span>
 				<div id="rounds-window">
-        <label for="rounds-input">Choose number of rounds (1-20):</label>
-        <input type="number" id="rounds-input" min="1" max="20" value="5">
+        <label for="rounds-input">Choose number of rounds (1-50):</label>
+        <input type="number" id="rounds-input" min="1" max="50" value="5">
         <button onclick="startGame()">Start Game</button>
     </div>
-	<div id="timer-settings" class="styled-window">
-        <label for="timer-duration">Set timer duration (10s to 1200s):</label>
-        <input type="number" style="border-radius: 30px;" id="timer-duration" min="10" max="600" value="120">
-        <button onclick="setTimerDuration()" class="styled-button">Set Timer</button>
-    </div>
+<div id="timer-settings" class="styled-window">
+    <label for="timer-duration">Set timer duration (10s to 1200s). Currently <span id="current-timer-duration" style="color: green;">120</span>s</label>
+    <input type="number" style="border-radius: 30px;" id="timer-duration" min="10" max="1200" value="120">
+    <button onclick="setTimerDuration()" class="styled-button">Set Timer</button>
+</div>
 	<select id="country-selector" onchange="updateCountry()">
         <option value="all">All Countries</option>
         <option value="us">United States</option>
@@ -297,6 +309,10 @@ button[onclick="startGame()"]:hover {
         <option value="vienna">Wien :^)</option>
         <option value="belgrade">Beograd</option>
     </select>
+    <!-- Existing content -->
+    <button id="toggle-streetview-movement" onclick="toggleStreetViewMovement()">Enable/Disable Movement</button>
+    <span id="movement-status" style="color: green;">Movement Enabled</span>
+
 	
 <span style="color: white; margin-bottom: -20px"><h2>Custom mode - pregenerated locations from a file</h2></span>
 
@@ -309,19 +325,26 @@ button[onclick="startGame()"]:hover {
 <span style="color: white; margin-bottom: -20px"><h2>Editor - create a file with your own locations</h2></span>
 <button id="launch-custom-mode" onclick="launchCustomGenerationMode()">Launch custom mode editor</button>
 	
-<span style="color: white;">v29.11.2023, f_otterguessr_a9</span>
+<span style="color: white;">v29.11.2023c, f_otterguessr_a12</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
     <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
 
 <div id="custom-location-editor" class="overlay" style="display: none;">
-    <span style="color: white;"><h4>Welcome to the editor! Press "Show guide" to see how this all works. Have fun!</h4></span>
+    <span style="color: white;">
+        <h4>Welcome to the editor! Press "Show guide" to see how this all works. Have fun!</h4>
+        <p>Current timer length: <span id="custom-timer-display" style="color: green;">120</span> seconds</p>
+        <p>Movement: <span id="custom-movement-status" style="color: green;">Enabled</span></p>
+        <p>Saved locations: <span id="custom-location-count">0</span></p>
+    </span>
     <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+
         <button onclick="saveLocation()">Save location (create round)</button>
         <div>
             <input type="number" id="custom-timer-input" value="120" min="10" max="1200">
             <button onclick="setCustomRoundTimerLength()">Set round length</button>
         </div>
+		<button id="toggle-movement-button" onclick="toggleCustomMovement()">Enable/Disable Movement</button>
         <button onclick="showGuide()">Show Guide</button>
         <button id="download-custom-file" onclick="downloadCustomLocationsFile()" style="display: block;">Download custom mode!</button>
         <button onclick="toggleCustomGenerationMode()">Close editor</button>
@@ -399,6 +422,15 @@ function setupGameFromFile(data) {
         // Set locations for the game
         generatedLocations = data.locations.map(loc => new google.maps.LatLng(loc.lat, loc.lng));
 
+        // Check and set Street View movement status
+        if (data.hasOwnProperty('movementEnabled')) {
+            allowStreetViewMovement = data.movementEnabled;
+            console.log(`Movement in the loaded file is ${allowStreetViewMovement ? 'enabled' : 'disabled'}.`);
+        } else {
+            console.log("Movement status not specified in the file. Defaulting to enabled.");
+            allowStreetViewMovement = true;
+        }
+
         console.log(`File ${data.randomFileName} loaded. Timer is ${data.roundLength} seconds, there are ${data.totalRounds} rounds, the locations are:`);
         data.locations.forEach((loc, index) => console.log(`Round ${index + 1}: ${loc.lat}, ${loc.lng}`));
 
@@ -407,6 +439,7 @@ function setupGameFromFile(data) {
         console.error('Invalid game data from file.');
     }
 }
+
 
         var radii = [50, 100, 500];  // Search radii in km
         var radiusIndex = 0;
@@ -610,36 +643,42 @@ function showStreetView(latLng) {
         source: google.maps.StreetViewSource.OUTDOOR
     }, function(data, status) {
         if (status === google.maps.StreetViewStatus.OK) {
+            var panoramaOptions = {
+                position: latLng,
+                pov: { heading: 34, pitch: 10 },
+                addressControl: false,
+                showRoadLabels: false,
+                clickToGo: allowStreetViewMovement, // Use the global variable
+                scrollwheel: allowStreetViewMovement, // Disable scrolling
+                linksControl: allowStreetViewMovement  // Disable navigation arrows
+            };
             var panorama = new google.maps.StreetViewPanorama(
-                document.getElementById('street-view'), {
-                    position: latLng,
-                    pov: { heading: 34, pitch: 10 },
-                    addressControl: false,
-                    showRoadLabels: false
-                });
+                document.getElementById('street-view'), panoramaOptions);
             startTimer();
             initMap(data.location.latLng);
-	
         } else {
             console.error('Street View not found for the given location.');
         }
     });
 }
 
+
 		
 		var timer;
         var timePerRound = 120; // Default time per round in seconds
 
-        function setTimerDuration() {
-        var newDuration = parseInt(document.getElementById('timer-duration').value);
-        if (newDuration >= 10 && newDuration <= 1200) {
-            timePerRound = newDuration;
-            console.log('Timer duration set to:', timePerRound); // Debugging
-            alert('Timer duration set to ' + timePerRound + ' seconds.'); // Popup message
-        } else {
-            alert('Please enter a duration between 10 and 1200 seconds.');
-        }
+function setTimerDuration() {
+    var newDuration = parseInt(document.getElementById('timer-duration').value);
+    if (newDuration >= 10 && newDuration <= 1200) {
+        timePerRound = newDuration;
+        console.log('Timer duration set to:', timePerRound); // Debugging
+        document.getElementById('current-timer-duration').textContent = timePerRound; // Update the displayed timer duration
+        alert('Timer duration set to ' + timePerRound + ' seconds.'); // Popup message
+    } else {
+        alert('Please enter a duration between 10 and 1200 seconds.');
     }
+}
+
 
 
         function startTimer() {
@@ -680,6 +719,25 @@ function showStreetView(latLng) {
             document.getElementById('score').textContent = totalScore;
         }
 
+
+var allowStreetViewMovement = true; // Global variable to control Street View movement
+
+function toggleStreetViewMovement() {
+    allowStreetViewMovement = !allowStreetViewMovement;
+    console.log('Street View movement ' + (allowStreetViewMovement ? 'enabled' : 'disabled'));
+
+    var statusText = allowStreetViewMovement ? 'enabled' : 'disabled';
+    var statusColor = allowStreetViewMovement ? 'green' : 'red';
+
+    document.getElementById('movement-status').textContent = `Movement ${statusText}`;
+    document.getElementById('movement-status').style.color = statusColor;
+
+    alert('Street View movement has been ' + statusText + '.');
+}
+
+
+
+
 async function processSVData(data, status) {
     if (status === google.maps.StreetViewStatus.OK) {
         // Snap the panorama's coordinates to the nearest road.
@@ -698,18 +756,16 @@ if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, 
             }
 
             // Otherwise, display the panorama and the map.
-            var panorama = new google.maps.StreetViewPanorama(
-                document.getElementById('street-view'),
-                {
-                    position: data.location.latLng,
-                    pov: {
-                        heading: 34,
-                        pitch: 10
-                    },
-                    addressControl: false,
-					showRoadLabels: false  // Hide road labels
-                });
-              // Start the timer when a new location is found
+           var panoramaOptions = {
+        position: data.location.latLng,
+        pov: { heading: 34, pitch: 10 },
+        addressControl: false,
+        showRoadLabels: false,
+        clickToGo: allowStreetViewMovement,
+        scrollwheel: allowStreetViewMovement,
+        linksControl: allowStreetViewMovement
+    };
+    var panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view'), panoramaOptions);
             console.log('Pair for location found at', data.location.latLng); // Debugging
             startTimer();
             initMap(data.location.latLng);
@@ -755,11 +811,12 @@ var isGameActive = false; // New variable to track the game state
 
 
        var gameData = {
-            locations: [],
-            randomFileName: '',
-            totalRounds: 0,
-            roundLength: 0 // New property to store round length
-        };
+		locations: [],
+		randomFileName: '',
+		totalRounds: 0,
+		roundLength: 0,
+		streetViewMovementEnabled: true // New property to store Street View movement status
+	};
 
         function generateRandomFileName() {
             var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -771,18 +828,23 @@ var isGameActive = false; // New variable to track the game state
         }
 
         function saveGameData() {
-            var blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
-            var a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = gameData.randomFileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+    var blob = new Blob([JSON.stringify(gameData)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = gameData.randomFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    console.log('Game data saved to file:', gameData.randomFileName);
+    console.log('Street View movement in the saved game was ' + (gameData.streetViewMovementEnabled ? 'enabled' : 'disabled'));
+}
+
 		
 		
 function startGame() {
     isGameActive = true; // Set to true when a new game starts
+    roundScores = []; // Reset the round scores for the new game
     if (!generatedLocations || generatedLocations.length === 0) {
         generatedLocations = []; // Reset generated locations only if none are preloaded
         gameData.randomFileName = generateRandomFileName(); // Generate random file name
@@ -809,12 +871,16 @@ function startGame() {
     fetchStreetView();
 }
 
+var roundScores = []; // Global array to store scores for each round
 
-        function calculateScore(distance) {
-       var score = 10000 * Math.exp(-0.000001 * distance);
+function calculateScore(distance) {
+    var score = 10000 * Math.exp(-0.000001 * distance);
     console.log("Calculated score: " + score + " for distance: " + distance);
-    return Math.round(score);
+    var roundedScore = Math.round(score);
+    roundScores.push(roundedScore); // Store the rounded score for later use
+    return roundedScore;
 }
+
 
 
 
@@ -830,7 +896,7 @@ async function endGame() {
         zoom: 2
     });
 
-    for (var i = 0; i < generatedLocations.length; i++) {
+   for (var i = 0; i < generatedLocations.length; i++) {
         var genLoc = generatedLocations[i];
         var userLoc = userClickedLocations[i];
         if (!genLoc || !userLoc) {
@@ -841,11 +907,14 @@ async function endGame() {
         var genLocName = await getLocationName(genLoc);
         var userLocName = await getLocationName(userLoc);
         var distance = calculateDistance(genLoc.lat(), genLoc.lng(), userLoc.lat(), userLoc.lng());
+        var score = roundScores[i]; // Retrieve the stored score
+
+        console.log("Round " + (i + 1) + " - Calculated score: " + score + ", Distance: " + distance.toFixed(2) + " km");
 
         resultsHtml += `<li>Round ${i + 1}: 
-            ✔️ - <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a>, 
-            ❌ - <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a>, 
-            📏 - ${distance.toFixed(2)} km</li>`;
+            ✔️: <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a>, 
+            ❌: <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a>, 
+            📏: ${distance.toFixed(2)} km, 💯: ${score} points</li>`;
     
 
         // Add markers with circles on the map
@@ -895,7 +964,11 @@ async function endGame() {
     document.getElementById('game-results').style.display = 'block';
     document.getElementById('total-points').textContent = totalScore;
     localStorage.setItem('gameInProgress', 'false');
+
+    // Save the Street View movement status
+    gameData.streetViewMovementEnabled = allowStreetViewMovement;
     console.log('Game ended with total score: ' + totalScore);
+    console.log('Street View movement was ' + (allowStreetViewMovement ? 'enabled' : 'disabled'));
 
     // Save game data to a file if started with randomly generated locations
 	if (gameData.randomFileName) {
@@ -974,9 +1047,10 @@ function initMap() {
 
     // Add a click event listener to the map
 map.addListener('click', function(event) {
-clearInterval(timer); // Stop the timer when the map is clicked
-console.log('Map clicked, timer stopped.'); // Debugging
-    if (currentRound > totalRounds - 1) {
+    clearInterval(timer); // Stop the timer when the map is clicked
+    console.log('Map clicked, timer stopped.'); // Debugging
+
+    if (currentRound >= totalRounds) {
         return;
     }
 
@@ -984,11 +1058,13 @@ console.log('Map clicked, timer stopped.'); // Debugging
     userClickedLocations.push(clickedLatLng); 
     var generatedLatLng = generatedLocations[currentRound];
 
-    endRound(clickedLatLng, generatedLatLng);
-
-    var score = calculateScore(google.maps.geometry.spherical.computeDistanceBetween(generatedLatLng, clickedLatLng));
+    var distance = google.maps.geometry.spherical.computeDistanceBetween(generatedLatLng, clickedLatLng);
+    var score = calculateScore(distance);
+    roundScores[currentRound] = score; // Store the score for the current round
     totalScore += score;
     document.getElementById('score').textContent = totalScore;
+
+    endRound(clickedLatLng, generatedLatLng, score); // Pass the score as an argument
 
     if (currentRound === totalRounds - 1) {
         endGame();
@@ -996,6 +1072,8 @@ console.log('Map clicked, timer stopped.'); // Debugging
         currentRound++;
     }
 });
+
+
 
 
 
@@ -1023,15 +1101,19 @@ function degreesToRadians(degrees) {
 
 function endRound(userLatLng, correctLatLng) {
     var distance = calculateDistance(userLatLng.lat(), userLatLng.lng(), correctLatLng.lat(), correctLatLng.lng());
-    document.getElementById('result-text').innerText = `You clicked at (${userLatLng.lat().toFixed(5)}, ${userLatLng.lng().toFixed(5)}). The correct coordinates were (${correctLatLng.lat().toFixed(5)}, ${correctLatLng.lng().toFixed(5)}). These locations are ${Math.round(distance)} kilometers away.`;
+    var roundScore = roundScores[currentRound]; // Retrieve the score for the current round
+
+    document.getElementById('result-text').innerHTML = `You clicked at (${userLatLng.lat().toFixed(5)}, ${userLatLng.lng().toFixed(5)}). The correct coordinates were (${correctLatLng.lat().toFixed(5)}, ${correctLatLng.lng().toFixed(5)}). These locations are ${Math.round(distance)} kilometers away. Your score for this round is: ${roundScore}.`;
 
     displayResultMap(userLatLng, correctLatLng);
+    document.getElementById('round-end-overlay').style.display = 'flex';
 
-    console.log("Current Round: " + currentRound);
+
+    console.log("Current Round: " + currentRound + ", Score for this round: " + score);
     console.log("Total Rounds: " + totalRounds);
 
     var roundEndButton = document.getElementById('round-end-button');
-      if (currentRound === totalRounds - 1) {
+    if (currentRound === totalRounds - 1) {
         // Last round - change the button text and function
         roundEndButton.innerText = 'Show Results';
         roundEndButton.onclick = function() {
@@ -1120,31 +1202,48 @@ async function getLocationName(latLng) {
     }
 }
 
-
-async function endRound(userLatLng, correctLatLng) {
+async function endRound(userLatLng, correctLatLng, score) {
     var userLocationName = await getLocationName(userLatLng);
     var correctLocationName = await getLocationName(correctLatLng);
     var distance = calculateDistance(userLatLng.lat(), userLatLng.lng(), correctLatLng.lat(), correctLatLng.lng());
 
-		document.getElementById('result-text').innerHTML = `
+    document.getElementById('result-text').innerHTML = `
         You clicked at <a href="https://www.google.com/maps/search/?api=1&query=${userLatLng.lat()},${userLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${userLocationName}</a>. 
         The correct location was <a href="https://www.google.com/maps/search/?api=1&query=${correctLatLng.lat()},${correctLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${correctLocationName}</a>. 
-        These locations are ${Math.round(distance)} kilometers away.`;
+        These locations are ${Math.round(distance)} kilometers away. 
+        Your score for this round is: ${score}.`;
 
     displayResultMap(userLatLng, correctLatLng);
     document.getElementById('round-end-overlay').style.display = 'flex';
 }
 
 
+
+
 		
     </script>
 	<script>
 var customLocations = []; // Array to hold custom locations
+var customMarkers = []; // Array to hold markers
 var customTotalRounds = 0; // Total number of rounds for custom mode
 var currentLatLng; // Global variable to store the current location
 var customMap; // This will hold the map instance
 var customRoundTimerLength = 120; // Default round timer length
 var locationSet = false; // Flag to check if a location is set
+var customMovementEnabled = true; // Default: Movement enabled
+
+
+function toggleCustomMovement() {
+    customMovementEnabled = !customMovementEnabled;
+    var statusText = customMovementEnabled ? 'Enabled' : 'Disabled';
+    var statusColor = customMovementEnabled ? 'green' : 'red';
+    document.getElementById('custom-movement-status').textContent = statusText;
+    document.getElementById('custom-movement-status').style.color = statusColor;
+    alert('Street View movement in custom mode is now ' + statusText + '.');
+}
+
+
+
 
 function initCustomMap() {
     var mapOptions = {
@@ -1179,25 +1278,26 @@ function saveLocation() {
         if (!customLocations.some(loc => loc.lat() === currentLatLng.lat() && loc.lng() === currentLatLng.lng())) {
             customLocations.push(currentLatLng);
             console.log('Location saved into the custom games file:', currentLatLng.lat(), currentLatLng.lng());
-            alert("Location number " + customLocations.length + " at (" + currentLatLng.lat().toFixed(5) + ", " + currentLatLng.lng().toFixed(5) + ") saved.\n\nContinue to place more locations, or download your custom mode!");
-            new google.maps.Marker({
+
+            // Create a new marker and add it to the map and customMarkers array
+            var marker = new google.maps.Marker({
                 position: currentLatLng,
                 map: customMap
             });
+            customMarkers.push(marker); // Save the marker
+
+            alert("Location number " + customLocations.length + " at (" + currentLatLng.lat().toFixed(5) + ", " + currentLatLng.lng().toFixed(5) + ") saved.\n\nContinue to place more locations, or download your custom mode!");
             currentLatLng = null;
             locationSet = false;
-            if (customLocations.length === customTotalRounds) {
+            document.getElementById('custom-location-count').textContent = customLocations.length; // Update the count of saved locations
+            if (customLocations.length > 0) {
                 document.getElementById('download-custom-file').style.display = 'block';
             }
-        } else {
-            console.log("Location already present. Choose a different location.");
-            alert("Location already present. Choose a different location.");
-        }
-    } else {
-        console.log('No streetview present, location cannot be saved.');
-        alert('Get into streetview mode to save locations. If in streetview mode, choose a different location.');
-    }
-}
+            console.log('Saved locations updated. Count:', customLocations.length); // Debugging
+     } 
+	 }
+	 }
+
 
 
 function launchCustomGenerationMode() {
@@ -1213,18 +1313,14 @@ function launchCustomGenerationMode() {
               "1. Use the yellow stickman icon to get into street view of your favorite location.\n" +
               "2. (Optional): Move around to find the perfect spot.\n" +
               "3. Press 'Save location' to save your favorite location. 1 location = 1 round.\n" +
-              "4. (Optional): Set the timer for each round. Default is 120 seconds.\n" +
+              "4. (Optional): Set the round timer / disable movement.\n" +
               "5. Press 'Download custom mode!' to download your mode.\n\n" +
               "You can now use this file to play your custom made mode!\n\n" +
               "(Please note, only regular street views are supported. Static places like museums or indoors (anywhere where the user cannot move) are not supported. See console - F12, for whether your location has been saved successfully.)");
     }
 
 
-    // Function to set the total number of rounds for custom mode
-    function setCustomTotalRounds() {
-        customTotalRounds = parseInt(document.getElementById('custom-rounds-input').value);
-        console.log('Custom Total Rounds set to:', customTotalRounds); // Debugging
-    }
+
 
 // Add a global variable for custom round timer length
 var customRoundTimerLength = 120; 
@@ -1233,23 +1329,28 @@ var customRoundTimerLength = 120;
 function setCustomRoundTimerLength() {
     var timerLengthInput = document.getElementById('custom-timer-input').value;
     customRoundTimerLength = parseInt(timerLengthInput);
-
-    // Display a browser popup with the new timer duration
+    document.getElementById('custom-timer-display').textContent = customRoundTimerLength; // Update the displayed timer duration
     alert('Custom mode timer changed to ' + customRoundTimerLength + ' seconds.');
-
-    console.log('Custom round timer length set to:', customRoundTimerLength, 'seconds');
 }
 
-// Update the downloadCustomLocationsFile function
+
+
 function downloadCustomLocationsFile() {
+    // Ensure there is at least one location saved
+    if (customLocations.length === 0) {
+        alert("Please save at least one location before downloading the file.");
+        return;
+    }
+
     // Set the total number of rounds based on the number of saved locations
     customTotalRounds = customLocations.length;
 
     var customGameData = {
         locations: customLocations.map(loc => ({ lat: loc.lat(), lng: loc.lng() })),
         randomFileName: generateRandomFileName(),
-        totalRounds: customTotalRounds.toString(),
-        roundLength: customRoundTimerLength // Use the custom round timer length
+        totalRounds: customTotalRounds,
+        roundLength: customRoundTimerLength,
+        movementEnabled: customMovementEnabled
     };
 
     var blob = new Blob([JSON.stringify(customGameData)], { type: 'application/json' });
@@ -1260,12 +1361,42 @@ function downloadCustomLocationsFile() {
     a.click();
     document.body.removeChild(a);
 
-    console.log(`Custom locations file ${customGameData.randomFileName} downloaded, containing ${customTotalRounds} rounds with ${customRoundTimerLength} seconds per round.`);
+    // Popup message
+    var movementStatus = customMovementEnabled ? 'enabled' : 'disabled';
+    alert(`File ${customGameData.randomFileName} generated, containing ${customTotalRounds} rounds, round timer of ${customRoundTimerLength} seconds, and movement ${movementStatus}. Have fun!`);
 
-    // Reset customLocations array after download
-    customLocations = [];
+    // Reset the editor values
+    resetCustomEditor();
 }
 
+
+function resetCustomEditor() {
+    // Remove all markers from the map
+    for (var i = 0; i < customMarkers.length; i++) {
+        if (customMarkers[i]) {
+            customMarkers[i].setMap(null);
+        }
+    }
+
+    // Reset the arrays and other values
+    customMarkers = [];
+    customLocations = [];
+    customTotalRounds = 0;
+    currentLatLng = null;
+    locationSet = false;
+    customRoundTimerLength = 120;
+    customMovementEnabled = true;
+
+    // Reset UI elements
+    document.getElementById('custom-timer-input').value = 120;
+    document.getElementById('download-custom-file').style.display = 'none';
+    document.getElementById('custom-timer-display').textContent = '120'; // Reset timer display
+    document.getElementById('custom-movement-status').textContent = 'Enabled'; // Reset movement status
+    document.getElementById('custom-movement-status').style.color = 'green';
+    document.getElementById('custom-location-count').textContent = '0'; // Reset saved locations count
+
+    console.log('Custom editor reset. All markers cleared.'); // Debugging
+}
 
 function launchCustomGenerationMode() {
     var editor = document.getElementById('custom-location-editor');
@@ -1299,7 +1430,7 @@ function toggleCustomGenerationMode() {
 
 <div id="game-over">
     <p>Game over. You won <span id="total-points">0</span> points!</p>
-    <div id="gameover-map" style="width: 800px; height: 600px; margin-top: 20px;"></div> <!-- New Map Container -->
+    <div id="gameover-map" style="width: 780px; height: 600px; margin-top: 20px;"></div> <!-- New Map Container -->
     <button id="play-again-button" onclick="restartGame()">Play Again</button>
 
 </div>
