@@ -1,10 +1,8 @@
-
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <title>Otterguessr | Ermine.at</title>
     <style>
@@ -12,16 +10,16 @@
             height: 100%;
             margin: 0;
             padding: 0;
-			font-family: 'Roboto', sans-serif;
-		}
+                        font-family: 'Roboto', sans-serif;
+                }
 
 
-        
+
 
         #street-view {
             height: 100%;
         }
-		#launch-custom-mode {
+                #launch-custom-mode {
     background-color: #ffffff; /* Green background */
     color: black; /* White text */
     padding: 10px; /* Padding for size */
@@ -34,7 +32,7 @@
     border-radius: 30px; /* Rounded corners */
 }
 
-	#toggle-streetview-movement {
+        #toggle-streetview-movement {
     background-color: #ffffff; /* Green background */
     color: black; /* White text */
     padding: 10px; /* Padding for size */
@@ -67,8 +65,8 @@
     right: 20px; /* Adjust position to move left */
 }
 
-		
-		/* Hide the Street View Pegman */
+
+                /* Hide the Street View Pegman */
 .gm-svpc {
 }
 
@@ -91,7 +89,7 @@
     border-radius: 30px;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
-		#reload-button {
+                #reload-button {
             position: fixed;
         top: 160px; /* Adjust this if needed to clear the rounds window */
             left: 91.5%;
@@ -99,13 +97,13 @@
             padding: 0px 3px;
             font-size: 16px;
             cursor: pointer;
-			color: black !important;
+                        color: black !important;
             background-color: #ffffff;
             border: none;
             color: white;
             z-index: 5;
         }
-		
+
 
 
 #rounds-window {
@@ -161,7 +159,7 @@
     #street-view .gm-style .gm-fullscreen-control {
         display: none !important;
     }
-  
+
 .overlay {
     position: fixed; /* Stay in place */
     z-index: 10000; /* Sit on top */
@@ -188,14 +186,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: black;
+    background-color: rgba(0,0,0,0.2); /* Black background with 0.2 opacity */
     z-index: 10; /* High z-index to be on top */
     display: flex;
     flex-direction: column; /* Align children in a column */
     align-items: center;
     justify-content: center;
     padding: 10px; /* Add padding for spacing */
-	overflow-y: auto;
+        overflow-y: auto;
 }
 
 
@@ -210,10 +208,10 @@
             z-index: 30;
             text-align: center;
             padding-top: 20%;
-			opacity: 1;
+                        opacity: 1;
         }
-		
-		 .styled-window {
+
+                 .styled-window {
             display: block;
             position: relative; /* Changed to relative */
             z-index: 10;
@@ -228,7 +226,7 @@
 #rounds-window, #country-selector, #game-over, #score-display {
     font-weight: bold; /* Make the font bold */
 }
-#rounds-input, 
+#rounds-input,
 button[onclick="startGame()"] {
     border-radius: 30px;
 }
@@ -247,7 +245,7 @@ button[onclick="startGame()"]:hover {
 
 #play-again-button {
     background-color: black; /* Set the background to black */
-	margin-top:5px;
+        margin-top:5px;
     color: white;            /* Set the text color to white */
     border-radius: 30px;     /* Rounded corners */
     transition: all 0.3s ease;/* Transition effect for smooth changes */
@@ -285,7 +283,7 @@ button[onclick="startGame()"]:hover {
  <div id="loading-screen">
         <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
 <span style="color: white; margin-bottom: -20px"><h2>Classic mode - randomly generated locations</h2></span>
-				<div id="rounds-window">
+                                <div id="rounds-window">
         <label for="rounds-input">Choose number of rounds (1-50):</label>
         <input type="number" id="rounds-input" min="1" max="50" value="5">
         <button onclick="startGame()">Start Game</button>
@@ -295,7 +293,7 @@ button[onclick="startGame()"]:hover {
     <input type="number" style="border-radius: 30px;" id="timer-duration" min="10" max="1200" value="120">
     <button onclick="setTimerDuration()" class="styled-button">Set Timer</button>
 </div>
-	<select id="country-selector" onchange="updateCountry()">
+        <select id="country-selector" onchange="updateCountry()">
         <option value="all">All Countries</option>
         <option value="us">United States</option>
         <option value="fr">France</option>
@@ -303,7 +301,7 @@ button[onclick="startGame()"]:hover {
         <option value="it">Italy</option>
         <option value="jp">Japan</option>
         <option value="ru">Russia</option>
-		<option value="at">Austria</option>
+                <option value="at">Austria</option>
         <option value="de">Germany</option>
         <option value="pl">Poland</option>
         <option value="vienna">Wien :^)</option>
@@ -313,7 +311,7 @@ button[onclick="startGame()"]:hover {
     <button id="toggle-streetview-movement" onclick="toggleStreetViewMovement()">Enable/Disable Movement</button>
     <span id="movement-status" style="color: green;">Movement Enabled</span>
 
-	
+
 <span style="color: white; margin-bottom: -20px"><h2>Custom mode - pregenerated locations from a file</h2></span>
 
 <div class="styled-window">
@@ -324,11 +322,48 @@ button[onclick="startGame()"]:hover {
 
 <span style="color: white; margin-bottom: -20px"><h2>Editor - create a file with your own locations</h2></span>
 <button id="launch-custom-mode" onclick="launchCustomGenerationMode()">Launch custom mode editor</button>
-	
-<span style="color: white;">v29.11.2023c, f_otterguessr_a12</span>
 
+
+
+<input type="text" id="nickname" style="display:none;" placeholder="Enter your nickname">
+
+ 
+<div id="server-viewing">
+    <button onclick="refreshServerList()">View Servers</button>
+<div id="server-list" style="color:white"></div>
+</div>
+  <!-- Server Browser and Interaction Section -->
+   <div id="server-creation">
+    <input type="text" id="server-name" placeholder="Enter server name">
+    <button onclick="createServer()">Create Server</button>
+</div>
+
+<div id="player-list" class="player-list" style="color:white"></div>
+ 
+   <div id="chat-window" style="display: none; position: fixed; bottom: 0; right: 0; width: 300px; height: 200px; background-color: #fff; z-index: 50000;">
+    <!-- Chat messages will be displayed here -->
+</div>
+
+
+<!-- Additional HTML for Multiplayer Game Creation -->
+<div id="multiplayer-game-creation" style="display: block;">
+    <h3>Create a Multiplayer Game</h3>
+    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
+    <input type="number" id="num-rounds" placeholder="Choose number of rounds (1-50)">
+    <input type="number" id="timer-duration" placeholder="Set timer duration (10s to 1200s)">
+    <label>
+        <input type="checkbox" id="enable-movement">
+        Enable/Disable Movement
+    </label>
+    <button id="start-multiplayer-game">Start Multiplayer Game</button>
+</div>
+<!-- Add a placeholder for multiplayer game alerts -->
+<div id="multiplayer-alert" style="display: none;"></div>
+
+
+<span style="color: white;">v29.11.2023c, f_otterguessr_a12</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
-    <img height="36" style="border:0px;height:20px; display:block" src="static/donate.png" border="0" alt="Support on Ko-fi" />
+    <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
 
 <div id="custom-location-editor" class="overlay" style="display: none;">
@@ -345,25 +380,44 @@ button[onclick="startGame()"]:hover {
             <input type="number" id="custom-timer-input" value="120" min="10" max="1200">
             <button onclick="setCustomRoundTimerLength()">Set round length</button>
         </div>
-		<button id="toggle-movement-button" onclick="toggleCustomMovement()">Enable/Disable Movement</button>
+                <button id="toggle-movement-button" onclick="toggleCustomMovement()">Enable/Disable Movement</button>
         <button onclick="showGuide()">Show Guide</button>
         <button id="download-custom-file" onclick="downloadCustomLocationsFile()" style="display: block;">Download custom mode!</button>
         <button onclick="toggleCustomGenerationMode()">Close editor</button>
     </div>
     <div id="custom-map" style="width: 1000px; height: 700px;"></div>
 </div>
+ <div id="multiplayer-setup">
+    <h2>Create a multiplayer game</h2>
+    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
+    <div>
+      <label for="multi-rounds-input">Choose number of rounds (1-50):</label>
+      <input type="number" id="multi-rounds-input" min="1" max="50" value="5">
+    </div>
+    <div>
+      <label for="multi-timer-duration">Set timer duration (10s to 1200s):</label>
+      <input type="number" id="multi-timer-duration" min="10" max="1200" value="120">
+    </div>
+    <div>
+      <label for="multi-enable-movement">Enable/Disable Movement:</label>
+      <input type="checkbox" id="multi-enable-movement" checked>
+    </div>
+  </div>
+<div id="game-start-announcement" style="display: none;">A game is about to start. Get ready for the Otterguessr!</div>
 
+  <!-- Placeholder for multiplayer game alerts -->
+  <div id="multiplayer-alert"></div>
 
     </div>
     <div id="game-end-screen">
         <p>Here shall be stats.</p>
     </div>
-	
-	<div id="loading-icon" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index:10000">
-    <img src="static/wieselspin.gif" alt="Loading...">
-	</div>
 
-	
+        <div id="loading-icon" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index:10000">
+    <img src="static/wieselspin.gif" alt="Loading...">
+        </div>
+
+
 <div id="round-end-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; flex-direction: column;">
     <div id="result-map" style="width: 1000px; height: 700px; border-radius: 30px;"></div>
     <p id="result-text" style="color: white; font-size: 20px; margin: 20px;">You clicked at XYZ coordinates. The correct coordinates were XYZ. These locations are XYZ kilometers away.</p>
@@ -374,25 +428,25 @@ button[onclick="startGame()"]:hover {
     Round: <span id="round-number">0</span> / <span id="total-rounds">0</span>
 </div>
 
-    
+
     <div id="timer-display" style="position: absolute; top: 20px; left: 20px; background: white; padding: 10px; border-radius: 30px; box-shadow: 0 0 5px rgba(0,0,0,0.3); z-index: 5;">
         Time left: <span id="timer">--:--</span>
     </div>
 
     <div id="street-view"></div>
     <div id="map"></div>
-   
+
     <script>
 
 
 
         function initialize() {
             updateCountry();
-			showRoundsWindow(); // Call this function to manage rounds window display
+                        showRoundsWindow(); // Call this function to manage rounds window display
 
         }
-		
-		function loadGameFromFile() {
+
+                function loadGameFromFile() {
     var fileInput = document.getElementById('file-input');
     var file = fileInput.files[0];
     if (!file) {
@@ -464,14 +518,14 @@ function setupGameFromFile(data) {
             it: { minLat: 35, maxLat: 47, minLng: 6, maxLng: 19 },
             jp: { minLat: 30, maxLat: 45, minLng: 129, maxLng: 146 },
             ru: { minLat: 41, maxLat: 81, minLng: 19, maxLng: 169 },
-			at: { minLat: 46.4, maxLat: 49, minLng: 9.5, maxLng: 17 },
+                        at: { minLat: 46.4, maxLat: 49, minLng: 9.5, maxLng: 17 },
             de: { minLat: 47, maxLat: 55, minLng: 5.5, maxLng: 15 },
             pl: { minLat: 49, maxLat: 54.5, minLng: 14, maxLng: 24 },
-			vienna: { minLat: 48.15, maxLat: 48.25, minLng: 16.3, maxLng: 16.4 },
+                        vienna: { minLat: 48.15, maxLat: 48.25, minLng: 16.3, maxLng: 16.4 },
             belgrade: { minLat: 44.75, maxLat: 44.85, minLng: 20.35, maxLng: 20.55 }
         };
-		
-		function showRoundsWindow() {
+
+                function showRoundsWindow() {
             // Check if a game is in progress or not
             var gameInProgress = localStorage.getItem('gameInProgress');
             if(gameInProgress === 'true') {
@@ -482,7 +536,7 @@ function setupGameFromFile(data) {
                 document.getElementById('rounds-window').style.display = 'block';
             }
         }
-		
+
 
 function updateCountry() {
     var selectedCountry = document.getElementById('country-selector').value;
@@ -557,7 +611,7 @@ async function fetchCustomBoundary() {
         console.error('Please enter a town name.');
         return;
     }
-    
+
     try {
         var response = await fetch(`https://example.com/geojson-boundaries/${encodeURIComponent(townName)}`);
         if (!response.ok) {
@@ -594,11 +648,15 @@ async function fetchStreetView() {
         return; // Exit the function if the game is not active
     }
 
-    // Use preloaded location if available
     if (generatedLocations && generatedLocations.length > currentRound) {
         let latLng = generatedLocations[currentRound];
-        console.log(`Round ${currentRound + 1}: Generating location from file ${gameData.randomFileName}, location coordinates: ${latLng.lat()}, ${latLng.lng()}`);
-        showStreetView(latLng);
+        if (latLng && typeof latLng.lat === 'function' && typeof latLng.lng === 'function') {
+            // Valid location, proceed to show Street View
+            showStreetView(latLng);
+        } else {
+            console.error('Invalid location in generatedLocations:', latLng);
+            // Handle invalid location (e.g., fetch a new one or skip the round)
+        }
         return;
     }
     console.log("Fetching Street View for round:", currentRound + 1);
@@ -664,8 +722,8 @@ function showStreetView(latLng) {
 }
 
 
-		
-		var timer;
+
+                var timer;
         var timePerRound = 120; // Default time per round in seconds
 
 function setTimerDuration() {
@@ -683,7 +741,7 @@ function setTimerDuration() {
 
 
         function startTimer() {
-		    if (!isGameActive) {
+                    if (!isGameActive) {
         console.log('Game has ended. Timer will not start.');
         return; // Exit the function if the game is not active
     }
@@ -744,7 +802,7 @@ async function processSVData(data, status) {
         // Snap the panorama's coordinates to the nearest road.
         var response = await fetch(`https://roads.googleapis.com/v1/snapToRoads?path=${data.location.latLng.lat()},${data.location.latLng.lng()}&key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY`);
         var roadData = await response.json();
-        
+
         // Check if snappedPoints array has elements before trying to access its content
         if (roadData.snappedPoints && roadData.snappedPoints.length > 0) {
             // If the snapped coordinates are significantly different from the panorama's coordinates,
@@ -785,12 +843,12 @@ if (google.maps.geometry.spherical.computeDistanceBetween(data.location.latLng, 
             fetchStreetView();  // Generate a new random location
         }
     }
-				gameData.locations.push({ // Save location data
+                                gameData.locations.push({ // Save location data
                 lat: data.location.latLng.lat(),
                 lng: data.location.latLng.lng()
             });
-			  document.getElementById('loading-icon').style.display = 'none';
-			  console.log("Streetview found (location saved), wieselspin hidden."); // Debugging log
+                          document.getElementById('loading-icon').style.display = 'none';
+                          console.log("Streetview found (location saved), wieselspin hidden."); // Debugging log
               console.log('Location saved:', gameData.locations[gameData.locations.length - 1]); // Debugging
         }
 
@@ -812,12 +870,12 @@ var isGameActive = false; // New variable to track the game state
 
 
        var gameData = {
-		locations: [],
-		randomFileName: '',
-		totalRounds: 0,
-		roundLength: 0,
-		streetViewMovementEnabled: true // New property to store Street View movement status
-	};
+                locations: [],
+                randomFileName: '',
+                totalRounds: 0,
+                roundLength: 0,
+                streetViewMovementEnabled: true // New property to store Street View movement status
+        };
 
         function generateRandomFileName() {
             var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -841,9 +899,10 @@ var isGameActive = false; // New variable to track the game state
     console.log('Street View movement in the saved game was ' + (gameData.streetViewMovementEnabled ? 'enabled' : 'disabled'));
 }
 
-		
-		
+
+
 function startGame() {
+  currentRound = 0; 
     isGameActive = true; // Set to true when a new game starts
     roundScores = []; // Reset the round scores for the new game
     if (!generatedLocations || generatedLocations.length === 0) {
@@ -912,11 +971,11 @@ async function endGame() {
 
         console.log("Round " + (i + 1) + " - Calculated score: " + score + ", Distance: " + distance.toFixed(2) + " km");
 
-        resultsHtml += `<li>Round ${i + 1}: 
-            ✔️: <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a>, 
-            ❌: <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a>, 
+        resultsHtml += `<li>Round ${i + 1}:
+            ✔️: <a href="https://www.google.com/maps/search/?api=1&query=${genLoc.lat()},${genLoc.lng()}" target="_blank">${genLocName}</a>,
+            ❌: <a href="https://www.google.com/maps/search/?api=1&query=${userLoc.lat()},${userLoc.lng()}" target="_blank">${userLocName}</a>,
             📏: ${distance.toFixed(2)} km, 💯: ${score} points</li>`;
-    
+
 
         // Add markers with circles on the map
         var userMarker = new google.maps.Marker({
@@ -956,7 +1015,7 @@ async function endGame() {
         });
     }
 
-   
+
 
    resultsHtml += "</ul>";
     document.getElementById('game-results').innerHTML = resultsHtml;
@@ -972,24 +1031,24 @@ async function endGame() {
     console.log('Street View movement was ' + (allowStreetViewMovement ? 'enabled' : 'disabled'));
 
     // Save game data to a file if started with randomly generated locations
-	if (gameData.randomFileName) {
+        if (gameData.randomFileName) {
         gameData.locations = generatedLocations;
         saveGameData(); // Save the game data to a file
         console.log('Game data saved to file:', gameData.randomFileName); // Debugging
     } else {
         console.log('Game started with preloaded locations, no file will be downloaded.');
     }
-	
 
-    
-	
+
+
+
    // Reset game data and generated locations
     generatedLocations = [];
     gameData = { locations: [], randomFileName: '', totalRounds: 0, roundLength: 0 };
     console.log('Game ended, data cache deleted.'); // Debugging message
 
 
-}	
+}
 document.getElementById('game-end-screen').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('loading-screen').style.display = 'flex';
@@ -1023,8 +1082,8 @@ updateRoundNumberDisplay();
 
 
 
-		
-		        window.onload = initialize;
+
+                        window.onload = initialize;
 
 
 function initMap() {
@@ -1047,30 +1106,46 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
 
     // Add a click event listener to the map
+// Assuming this function is called when the map is clicked
 map.addListener('click', function(event) {
-    clearInterval(timer); // Stop the timer when the map is clicked
-    console.log('Map clicked, timer stopped.'); // Debugging
+    clearInterval(timer);
+    console.log('Map clicked, timer stopped.');
 
-    if (currentRound >= totalRounds) {
-        return;
-    }
+    // Debugging: Log the current state
+    console.log('Current Round:', currentRound);
+    console.log('Generated Locations:', JSON.stringify(generatedLocations));
+    console.log('Clicked Location:', event.latLng.toString());
 
-    var clickedLatLng = event.latLng;
-    userClickedLocations.push(clickedLatLng); 
-    var generatedLatLng = generatedLocations[currentRound];
+    // Ensure that the clicked location is valid
+    if (event.latLng && typeof event.latLng.lat === 'function' && typeof event.latLng.lng === 'function') {
+        var clickedLatLng = event.latLng;
+        userClickedLocations.push(clickedLatLng);
 
-    var distance = google.maps.geometry.spherical.computeDistanceBetween(generatedLatLng, clickedLatLng);
-    var score = calculateScore(distance);
-    roundScores[currentRound] = score; // Store the score for the current round
-    totalScore += score;
-    document.getElementById('score').textContent = totalScore;
+        // Check if the generated location for the current round is valid
+        if (generatedLocations[currentRound] && typeof generatedLocations[currentRound].lat === 'function' && typeof generatedLocations[currentRound].lng === 'function') {
+            var generatedLatLng = generatedLocations[currentRound];
 
-    endRound(clickedLatLng, generatedLatLng, score); // Pass the score as an argument
+        // Validate generated location data
+        if (generatedLatLng && typeof generatedLatLng.lat === 'function' && typeof generatedLatLng.lng === 'function') {
+            // Proceed with your logic
+            var distance = google.maps.geometry.spherical.computeDistanceBetween(generatedLatLng, clickedLatLng);
+            var score = calculateScore(distance);
+            roundScores[currentRound] = score;
+            totalScore += score;
+            document.getElementById('score').textContent = totalScore;
 
-    if (currentRound === totalRounds - 1) {
-        endGame();
+            endRound(clickedLatLng, generatedLatLng, score);
+        } } else {
+            console.error('Invalid generated location data for current round:', currentRound, generatedLocations[currentRound]);
+        }
+
+        if (currentRound === totalRounds - 1) {
+            endGame();
+        } else {
+            currentRound++;
+        }
     } else {
-        currentRound++;
+        console.error('Invalid click location data');
     }
 });
 
@@ -1078,9 +1153,11 @@ map.addListener('click', function(event) {
 
 
 
+
+
 }
 
-		function calculateDistance(lat1, lng1, lat2, lng2) {
+                function calculateDistance(lat1, lng1, lat2, lng2) {
     var earthRadiusKm = 6371;
 
     var dLat = degreesToRadians(lat2-lat1);
@@ -1090,8 +1167,8 @@ map.addListener('click', function(event) {
     lat2 = degreesToRadians(lat2);
 
     var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.sin(dLng/2) * Math.sin(dLng/2) * Math.cos(lat1) * Math.cos(lat2); 
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            Math.sin(dLng/2) * Math.sin(dLng/2) * Math.cos(lat1) * Math.cos(lat2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return earthRadiusKm * c;
 }
 
@@ -1187,8 +1264,8 @@ function displayResultMap(userLatLng, correctLatLng) {
 
 async function getLocationName(latLng) {
     var response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latLng.lat()},${latLng.lng()}&key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY`);
-	var data = await response.json();
-    
+        var data = await response.json();
+
     if (data.results.length > 0) {
         var result = data.results[0];
         var addressComponents = result.address_components;
@@ -1204,14 +1281,19 @@ async function getLocationName(latLng) {
 }
 
 async function endRound(userLatLng, correctLatLng, score) {
+    // Validate that both userLatLng and correctLatLng are valid
+    if (!userLatLng || !correctLatLng || typeof userLatLng.lat !== 'function' || typeof correctLatLng.lat !== 'function') {
+        console.error('Invalid location data for round end');
+        return; // Exit the function if data is invalid
+    }
     var userLocationName = await getLocationName(userLatLng);
     var correctLocationName = await getLocationName(correctLatLng);
     var distance = calculateDistance(userLatLng.lat(), userLatLng.lng(), correctLatLng.lat(), correctLatLng.lng());
 
     document.getElementById('result-text').innerHTML = `
-        You clicked at <a href="https://www.google.com/maps/search/?api=1&query=${userLatLng.lat()},${userLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${userLocationName}</a>. 
-        The correct location was <a href="https://www.google.com/maps/search/?api=1&query=${correctLatLng.lat()},${correctLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${correctLocationName}</a>. 
-        These locations are ${Math.round(distance)} kilometers away. 
+        You clicked at <a href="https://www.google.com/maps/search/?api=1&query=${userLatLng.lat()},${userLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${userLocationName}</a>.
+        The correct location was <a href="https://www.google.com/maps/search/?api=1&query=${correctLatLng.lat()},${correctLatLng.lng()}" target="_blank" style="color: white; font-weight: bold;">${correctLocationName}</a>.
+        These locations are ${Math.round(distance)} kilometers away.
         Your score for this round is: ${score}.`;
 
     displayResultMap(userLatLng, correctLatLng);
@@ -1221,9 +1303,170 @@ async function endRound(userLatLng, correctLatLng, score) {
 
 
 
-		
+
     </script>
+	        <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+
 	<script>
+var socket = io();
+
+function createServer() {
+    console.log("Debug: createServer function called");
+    var serverName = prompt("Enter a name for the new server:");
+    if (serverName) {
+        socket.emit('create', { room: serverName });
+        console.log("Debug: Attempting to create server with name:", serverName);
+    }
+}
+
+function refreshServerList() {
+    console.log("Debug: refreshServerList function called");
+    socket.emit('list_rooms');
+}
+
+socket.on('connect', function() {
+    console.log("Debug: Connected to server via Socket.io");
+    joinOrCreateGame();
+});
+
+socket.on('assigned_nickname', function(data) {
+    console.log("Debug: Assigned nickname:", data.nickname);
+});
+
+socket.on('multiplayer_game_created', function(data) {
+    console.log("Debug: Multiplayer game created. Settings:", data);
+    document.getElementById('game-start-announcement').style.display = 'block';
+
+    // Update totalRounds from the game settings received
+    totalRounds = parseInt(data.numRounds);
+
+    // Start the first round and update the round number display
+    currentRound = 0; // Reset current round to 0
+    updateRoundNumberDisplay(); // Update the round number display
+    startRound(true); // Indicate this is the first round
+    document.getElementById('loading-screen').style.display = 'none';
+});
+function joinOrCreateGame() {
+    console.log("Debug: joinOrCreateGame function called");
+    var roomName = prompt("Enter room name to join or leave blank to create a new room:");
+    if (roomName) {
+        socket.emit('join', { room: roomName });
+        console.log("Debug: Attempting to join room", roomName);
+    } else {
+        createServer();
+    }
+}
+
+// Improved Multiplayer Game Data Handling
+socket.on('multiplayer_game_data', function(data) {
+    if (data && Array.isArray(data.locations)) {
+        // Convert to Google Maps LatLng objects and validate each location
+        generatedLocations = data.locations.map(loc => {
+            if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+                return new google.maps.LatLng(loc.lat, loc.lng);
+            } else {
+                console.error('Invalid location format:', loc);
+                return null; // Use null as a placeholder for invalid locations
+            }
+        }).filter(loc => loc !== null); // Filter out invalid locations
+
+
+        // Update game settings based on received data
+        if (typeof data.totalRounds === 'number') {
+            totalRounds = data.totalRounds;
+        }
+
+        if (typeof data.roundLength === 'number') {
+            timePerRound = data.roundLength;
+        }
+
+        if (typeof data.enableMovement === 'boolean') {
+            allowStreetViewMovement = data.enableMovement;
+        }
+
+        // Log the received data for debugging
+        console.log('Multiplayer game data received:', data);
+
+ // Debugging: Log the state after receiving multiplayer game data
+    console.log('After receiving multiplayer data - Current Round:', currentRound);
+    console.log('After receiving multiplayer data - Generated Locations:', JSON.stringify(generatedLocations));
+        startGame();
+    } else {
+        console.error('Invalid multiplayer game data received:', data);
+    }
+});
+
+function startRound(firstRound = false) {
+    console.log("Debug: Starting new round in multiplayer game");
+    isGameActive = true;
+    if (!firstRound) {
+        currentRound++;
+    }
+    updateRoundNumberDisplay();
+    fetchStreetView();
+}
+
+function updateRoundNumberDisplay() {
+    document.getElementById('round-number').textContent = currentRound + 1; // +1 as rounds start at 0
+    document.getElementById('total-rounds').textContent = totalRounds;
+}
+
+
+socket.on('available_rooms', function(rooms) {
+    console.log("Debug: Available rooms:", rooms);
+    var serverList = document.getElementById('server-list');
+    serverList.innerHTML = '';
+    for (var room in rooms) {
+        if (rooms.hasOwnProperty(room)) {
+            var roomElement = document.createElement('div');
+            roomElement.textContent = `Room Name: ${room}, Players: ${rooms[room].player_count}`;
+            roomElement.style.cursor = 'pointer';
+            roomElement.onclick = function() {
+                socket.emit('join', { room: room });
+                console.log("Debug: Attempting to join room", room);
+            };
+            serverList.appendChild(roomElement);
+        }
+    }
+    if (Object.keys(rooms).length === 0) {
+        serverList.innerHTML = '<p>No available rooms. Create a new one!</p>';
+    }
+    console.log("Debug: Server list updated");
+});
+
+socket.onAny((event, ...args) => {
+    console.log(`Debug: Socket.io event received - ${event}`, args);
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var startMultiplayerGameButton = document.getElementById('start-multiplayer-game');
+    if (startMultiplayerGameButton) {
+        startMultiplayerGameButton.addEventListener('click', function() {
+            console.log("Debug: Start multiplayer game button clicked");
+            createMultiplayerGame();
+        });
+    }
+});
+
+function createMultiplayerGame() {
+    var numRounds = document.getElementById('num-rounds').value;
+    var timerDuration = document.getElementById('timer-duration').value;
+    var enableMovement = document.getElementById('enable-movement').checked;
+    var gameSettings = {
+        numRounds: numRounds,
+        timerDuration: timerDuration,
+        enableMovement: enableMovement
+    };
+    console.log("Debug: Multiplayer game creation request sent", gameSettings);
+    socket.emit('create_multiplayer_game', gameSettings);
+}
+
+
+
+
+
+</script>
+        <script>
 var customLocations = []; // Array to hold custom locations
 var customMarkers = []; // Array to hold markers
 var customTotalRounds = 0; // Total number of rounds for custom mode
@@ -1295,9 +1538,9 @@ function saveLocation() {
                 document.getElementById('download-custom-file').style.display = 'block';
             }
             console.log('Saved locations updated. Count:', customLocations.length); // Debugging
-     } 
-	 }
-	 }
+     }
+         }
+         }
 
 
 
@@ -1324,7 +1567,7 @@ function launchCustomGenerationMode() {
 
 
 // Add a global variable for custom round timer length
-var customRoundTimerLength = 120; 
+var customRoundTimerLength = 120;
 
 // Function to change custom round timer length
 function setCustomRoundTimerLength() {
@@ -1414,18 +1657,19 @@ function toggleCustomGenerationMode() {
     editor.style.display = "none";
 }
 
+
 </script>
 
-	<script>
-	function reloadLocation() {
+        <script>
+        function reloadLocation() {
     radiusIndex = 0;
     fetchStreetView();
 }
 </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY&callback=initialize"></script>
-	<button id="reload-button" style="display:none" onclick="reloadLocation()">reload</button>
-  
+        <button id="reload-button" style="display:none" onclick="reloadLocation()">reload</button>
+
 
     <div id="score-display">Points: <span id="score">0</span></div>
 
