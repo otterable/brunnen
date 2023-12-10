@@ -6,13 +6,13 @@
 
     <title>Otterguessr | Ermine.at</title>
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-                        font-family: 'Roboto', sans-serif;
-                }
-
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal overflow */
+}
 
 
 
@@ -45,7 +45,7 @@
     border-radius: 30px; /* Rounded corners */
 }
 
-    #map {
+ #map {
     position: absolute;
     bottom: 20px;
     right: 20px;
@@ -65,6 +65,28 @@
     right: 20px; /* Adjust position to move left */
 }
 
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #map {
+        width: 100%; /* Full width of the screen */
+        height: 300px; /* Set a fixed height */
+        bottom: 0; /* Align to the bottom of the screen */
+        right: 0; /* Align to the right of the screen */
+        border-radius: 0; /* Optional: remove border-radius for full-width */
+        box-shadow: none; /* Optional: remove box-shadow for a cleaner look */
+    }
+
+    #map:hover {
+        width: 100%; /* Maintain full width on hover */
+        height: 300px; /* Maintain height on hover */
+		    right: 0px; /* Adjust position to move left */
+			    bottom: 0px; /* Adjust position to move up */
+
+
+    }
+}
+
+
 
                 /* Hide the Street View Pegman */
 .gm-svpc {
@@ -75,7 +97,35 @@
     display: none !important;
 }
 
+/* Button style for toggling the map on mobile */
+#map-toggle-button {
+    position: fixed;
+    top: 150px;
+    right: 10px;
+    border: none;
+    background: transparent;
+    padding: 5px;
+    border-radius: 50px;
+    display: none; /* Hidden by default, will be displayed on mobile */
+    z-index: 2; /* Ensure it's above other elements */
+}
 
+#map-toggle-button img {
+    width: 40px;
+border-radius: 50px;
+    height: 40px; /* Adjust size as needed */
+}
+
+/* Hide the map by default on mobile devices */
+@media screen and (max-width: 768px) {
+    #map {
+        display: none;
+    }
+
+    #map-toggle-button {
+        display: block;
+    }
+}
 
 /* Hide business POIs - Note: This might not be possible with CSS alone */
 
@@ -116,6 +166,17 @@
     border-radius: 30px;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
+
+#generic-pill {
+    display: block;
+    position: relative; /* Changed to relative */
+    z-index: 10;
+    background: white;
+    padding: 10px;
+    margin-top: 10px; /* Space between the image and the window */
+    border-radius: 30px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
     #score-display {
         position: absolute;
         top: 90px; /* Adjusted top position */
@@ -126,6 +187,59 @@
         border-radius: 30px;
         box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
+
+/* Default Styles (for larger screens) */
+#round-end-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#result-map {
+    width: 1000px;
+    height: 700px;
+    border-radius: 30px;
+}
+
+#result-text {
+    color: white;
+    font-size: 20px;
+    margin: 20px;
+}
+
+#round-end-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 30px;
+}
+
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #result-map {
+        width: 90%; /* Adjust width to be a percentage of the screen */
+        height: auto; /* Adjust height to maintain aspect ratio */
+        max-width: 700px; /* Optional: set a max-width if needed */
+    }
+
+    #result-text {
+        font-size: 16px; /* Adjust font size for smaller screens */
+        padding: 0 10px; /* Add padding to keep the text within the viewport */
+    }
+
+    #round-end-button {
+        font-size: 16px; /* Adjust font size for smaller screens */
+    }
+}
+
 
 #game-over {
     display: none;
@@ -186,14 +300,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.2); /* Black background with 0.2 opacity */
+    background: black;
     z-index: 10; /* High z-index to be on top */
     display: flex;
     flex-direction: column; /* Align children in a column */
     align-items: center;
     justify-content: center;
     padding: 10px; /* Add padding for spacing */
-        overflow-y: auto;
+	overflow-y: auto;
 }
 
 
@@ -226,6 +340,22 @@
 #rounds-window, #country-selector, #game-over, #score-display {
     font-weight: bold; /* Make the font bold */
 }
+
+* Adjustments for mobile screens */
+@media screen and (max-width: 768px) {
+    #loading-screen {
+        padding: 5px; /* Reduced padding */
+    }
+
+    .smaller-image {
+        width: 50%; /* Larger width for the logo image */
+    }
+
+    #rounds-window, #timer-settings, .styled-window, #country-selector, #server-viewing, #server-creation, #multiplayer-game-creation {
+        width: 95%; /* Use more screen width */
+        margin: 5px 0; /* Smaller vertical spacing */
+    }
+	}
 #rounds-input,
 button[onclick="startGame()"] {
     border-radius: 30px;
@@ -255,12 +385,19 @@ button[onclick="startGame()"]:hover {
     background-color: grey; /* Background turns grey on hover */
     transform: scale(0.97); /* Make the button larger */
 }
+.smaller-image {
+    width: 20%; /* Adjust width as needed */
+    height: auto; /* Maintain aspect ratio */
+    position: fixed; /* Fix the position */
+    top: 0; /* Position at the top */
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%); /* Adjust for centering */
+    z-index: 1000; /* Ensure it's above other elements */
+}
 
-    .smaller-image {
-            width: 20%; /* Adjust the width as needed */
-            height: auto; /* Keeps the aspect ratio intact */
-        }
-
+#main-content {
+    padding-top: 300px !important; /* Add top padding to account for the fixed logo */
+}
 #timer-settings {
     font-weight: bold;
 }
@@ -276,12 +413,30 @@ button[onclick="startGame()"]:hover {
             background-color: grey;  /* Background turns grey on hover */
             transform: scale(0.97);  /* Make the button slightly larger */
         }
+		
+		 .styled-buttonwhite {
+            background-color: white;  /* Set the background to black */
+            color: black;             /* Set the text color to white */
+            border-radius: 30px;      /* Rounded corners */
+            transition: all 0.3s ease;/* Transition effect for smooth changes */
+        }
+
+        .styled-buttonwhite:hover {
+            background-color: grey;  /* Background turns grey on hover */
+            transform: scale(0.97);  /* Make the button slightly larger */
+        }
+		
+		
+		
+		
 
     </style>
 </head>
 <body>
  <div id="loading-screen">
         <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
+		<div id="main-content">
+
 <span style="color: white; margin-bottom: -20px"><h2>Classic mode - randomly generated locations</h2></span>
                                 <div id="rounds-window">
         <label for="rounds-input">Choose number of rounds (1-50):</label>
@@ -324,19 +479,21 @@ button[onclick="startGame()"]:hover {
 <button id="launch-custom-mode" onclick="launchCustomGenerationMode()">Launch custom mode editor</button>
 
 
-
+<span style="color: white; margin-bottom: -20px"><h2>Online Multiplayer</h2></span>
 <input type="text" id="nickname" style="display:none;" placeholder="Enter your nickname">
 
- 
+<div class="styled-window">
 <div id="server-viewing">
-    <button onclick="refreshServerList()">View Servers</button>
+    <button onclick="refreshServerList()" class="styled-button">View Servers</button>
 <div id="server-list" style="color:white"></div>
-</div>
-  <!-- Server Browser and Interaction Section -->
    <div id="server-creation">
-    <input type="text" id="server-name" placeholder="Enter server name">
-    <button onclick="createServer()">Create Server</button>
+    <input type="text" id="server-name" style="display:none" placeholder="Enter server name">
+    <button onclick="createServer()"  class="styled-button">Create Server</button>
 </div>
+</div>
+
+ </div>
+
 
 <div id="player-list" class="player-list" style="color:white"></div>
  
@@ -347,8 +504,7 @@ button[onclick="startGame()"]:hover {
 
 <!-- Additional HTML for Multiplayer Game Creation -->
 <div id="multiplayer-game-creation" style="display: block;">
-    <h3>Create a Multiplayer Game</h3>
-    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
+    <p>Online Multiplayer - Admin settings</p>
     <input type="number" id="num-rounds" placeholder="Choose number of rounds (1-50)">
     <input type="number" id="timer-duration" placeholder="Set timer duration (10s to 1200s)">
     <label>
@@ -402,6 +558,9 @@ button[onclick="startGame()"]:hover {
       <label for="multi-enable-movement">Enable/Disable Movement:</label>
       <input type="checkbox" id="multi-enable-movement" checked>
     </div>
+	
+
+  </div>
   </div>
 <div id="game-start-announcement" style="display: none;">A game is about to start. Get ready for the Otterguessr!</div>
 
@@ -418,7 +577,7 @@ button[onclick="startGame()"]:hover {
         </div>
 
 
-<div id="round-end-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; flex-direction: column;">
+<div id="round-end-overlay">
     <div id="result-map" style="width: 1000px; height: 700px; border-radius: 30px;"></div>
     <p id="result-text" style="color: white; font-size: 20px; margin: 20px;">You clicked at XYZ coordinates. The correct coordinates were XYZ. These locations are XYZ kilometers away.</p>
 <button id="round-end-button" onclick="nextRound()" style="padding: 10px 20px; font-size: 18px; cursor: pointer; border-radius: 30px;">Continue</button>
@@ -432,6 +591,12 @@ button[onclick="startGame()"]:hover {
     <div id="timer-display" style="position: absolute; top: 20px; left: 20px; background: white; padding: 10px; border-radius: 30px; box-shadow: 0 0 5px rgba(0,0,0,0.3); z-index: 5;">
         Time left: <span id="timer">--:--</span>
     </div>
+
+
+<button id="map-toggle-button" onclick="toggleMapDisplay()">
+    <img src="static/mapicon_mobile.png" alt="Toggle Map">
+</button>
+
 
     <div id="street-view"></div>
     <div id="map"></div>
@@ -1658,6 +1823,19 @@ function toggleCustomGenerationMode() {
 }
 
 
+</script>
+<script>
+function toggleMapDisplay() {
+    console.log("Toggling map display"); // Debugging
+    var map = document.getElementById('map');
+    if (map.style.display === 'none' || map.style.display === '') {
+        console.log("Displaying map"); // Debugging
+        map.style.display = 'block';
+    } else {
+        console.log("Hiding map"); // Debugging
+        map.style.display = 'none';
+    }
+}
 </script>
 
         <script>

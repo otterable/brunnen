@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, join_room, leave_room, emit
+from flask_cors import CORS
 import random
 from threading import Thread, Lock
 import time
+import logging
+
+logging.basicConfig(level=logging.DEBUG)  # Set the log level
 
 app = Flask(__name__)
+CORS(app, resources={r"/socket.io/*": {"origins": ["https://otterguessr.ermine.at", "http://localhost:5000"]}})
 app.config['SECRET_KEY'] = 'multiplayerisreal'
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins=["https://otterguessr.ermine.at", "http://localhost:5000"], logger=True, engineio_logger=True)
 
 rooms = {}  # Stores room details
 user_rooms = {}  # Maps users to their rooms
@@ -19,6 +24,7 @@ def generate_random_nickname():
 
 @app.route('/')
 def index():
+    app.logger.info('Processing default route')
     return render_template('index.html')
 
 
