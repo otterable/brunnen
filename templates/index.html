@@ -6,31 +6,19 @@
 
     <title>Otterguessr | Ermine.at</title>
     <style>
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: 'Roboto', sans-serif;
-    overflow-x: hidden; /* Prevent horizontal overflow */
-}
+    html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+			font-family: 'Roboto', sans-serif;
+		}
+
 
 
 
         #street-view {
             height: 100%;
         }
-                #launch-custom-mode {
-    background-color: #ffffff; /* Green background */
-    color: black; /* White text */
-    padding: 10px; /* Padding for size */
-    text-align: center; /* Centered text */
-    text-decoration: none; /* No underline */
-    display: inline-block; /* Inline block display */
-    font-size: 16px; /* Font size */
-    margin-top: 10px; /* Margin around the button */
-    cursor: pointer; /* Cursor changes to pointer on hover */
-    border-radius: 30px; /* Rounded corners */
-}
 
         #toggle-streetview-movement {
     background-color: #ffffff; /* Green background */
@@ -188,6 +176,21 @@ border-radius: 50px;
         box-shadow: 0 0 5px rgba(0,0,0,0.3);
     }
 
+
+#rounds-window {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center; /* Center items horizontally in the container */
+    align-items: center; /* Align items vertically in the middle */
+    gap: 10px; /* Add some space between elements */
+}
+
+#rounds-window label,
+#rounds-window input,
+#rounds-window button {
+    margin: 0; /* Remove default margin */
+}
+
+
 /* Default Styles (for larger screens) */
 #round-end-overlay {
     display: none;
@@ -225,18 +228,22 @@ border-radius: 50px;
 /* Mobile-specific styles */
 @media screen and (max-width: 768px) {
     #result-map {
-        width: 90%; /* Adjust width to be a percentage of the screen */
+        width: 98% !important; /* Adjust width to be a percentage of the screen */
+		top: 1%;
         height: auto; /* Adjust height to maintain aspect ratio */
         max-width: 700px; /* Optional: set a max-width if needed */
     }
+
 
     #result-text {
         font-size: 16px; /* Adjust font size for smaller screens */
         padding: 0 10px; /* Add padding to keep the text within the viewport */
     }
 
-    #round-end-button {
-        font-size: 16px; /* Adjust font size for smaller screens */
+   #round-end-button {
+           font-size: 16px; /* Adjust font size for smaller screens */
+margin-bottom: 10px !important; 
+        bottom: 1% !important;
     }
 }
 
@@ -254,6 +261,61 @@ border-radius: 50px;
     text-align: center;
 }
 
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #close-game-results {
+        position: absolute; /* Position the button absolutely within its parent */
+        bottom: 3%; /* 1% from the bottom edge of the parent container */
+        left: 50%; /* Center the button horizontally */
+        transform: translateX(-50%); /* Adjust for exact centering */
+        display: none; /* Hide the button by default */
+        padding: 5px 10px; /* Padding inside the button */
+        font-size: 16px; /* Font size of the button text */
+        border-radius: 10px; /* Rounded corners */
+        border: none; /* No border */
+        background-color: rgba(76, 175, 80, 0.8); /* Semi-transparent background color */
+        color: white; /* Text color */
+        cursor: pointer; /* Pointer cursor on hover */
+        text-align: center; /* Center the text inside the button */
+		z-index: 51;
+    }
+}
+
+
+
+
+
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    #game-over {
+	   top: 1%; /* Position the game-over container at the top with 1% gap */
+        bottom: auto; /* Reset the bottom value */
+        width: 90%; /* Adjust width to fit the mobile screen */
+        margin: 0 auto; /* Center the divs on the screen */
+        left: 0; /* Align to the left edge */
+        right: 0; /* Align to the right edge */
+        transform: translateX(0); /* Reset any translations */
+    }
+
+ #game-results {
+        width: 90%; /* Set the width to a percentage of the screen */
+        max-width: 90%; /* Ensure it doesn't exceed the screen width */
+        margin: 0 auto; /* Center it horizontally */
+        padding: 10px; /* Add some padding for spacing */
+        box-sizing: border-box; /* Include padding in the width calculation */
+        text-align: center; /* Center text inside the container */
+        bottom: 1%; /* Maintain the position at the bottom with 1% gap */
+        top: auto; /* Reset the top value */
+        left: 0 !important; /* Align to the left edge */
+        right: 0; /* Align to the right edge */
+    }
+    #gameover-map {
+        width: 100%; /* Ensure the map takes up the full width of its container */
+        max-width: 100%; /* Prevent the map from exceeding the container's width */
+        height: auto; /* Adjust the height to maintain the aspect ratio */
+        margin-top: 20px; /* Keep the existing top margin */
+    }
+}
 #game-results {
     display: none;
     position: absolute;
@@ -361,6 +423,10 @@ button[onclick="startGame()"] {
     border-radius: 30px;
 }
 
+.no-rooms-message {
+    color: black; /* Sets the text color to black */
+}
+
 button[onclick="startGame()"] {
     background-color: black;  /* Set the background to black */
     color: white;             /* Set the text color to white */
@@ -385,19 +451,12 @@ button[onclick="startGame()"]:hover {
     background-color: grey; /* Background turns grey on hover */
     transform: scale(0.97); /* Make the button larger */
 }
-.smaller-image {
-    width: 20%; /* Adjust width as needed */
-    height: auto; /* Maintain aspect ratio */
-    position: fixed; /* Fix the position */
-    top: 0; /* Position at the top */
-    left: 50%; /* Center horizontally */
-    transform: translateX(-50%); /* Adjust for centering */
-    z-index: 1000; /* Ensure it's above other elements */
-}
 
-#main-content {
-    padding-top: 300px !important; /* Add top padding to account for the fixed logo */
-}
+    .smaller-image {
+            width: 20%; /* Adjust the width as needed */
+            height: auto; /* Keeps the aspect ratio intact */
+        }
+
 #timer-settings {
     font-weight: bold;
 }
@@ -434,11 +493,13 @@ button[onclick="startGame()"]:hover {
 </head>
 <body>
  <div id="loading-screen">
-        <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
-		<div id="main-content">
+         <img src="static/otterguesserlogo.png" alt="OtterGuesser Logo" class="smaller-image">
 
-<span style="color: white; margin-bottom: -20px"><h2>Classic mode - randomly generated locations</h2></span>
-                                <div id="rounds-window">
+
+<button id="classic-mode-button" class="styled-window" onclick="toggleClassicMode()">Classic Mode - - randomly generated locations</button>
+<div id="classic-mode-settings" style="display: none;">
+                      
+					  <div id="rounds-window">
         <label for="rounds-input">Choose number of rounds (1-50):</label>
         <input type="number" id="rounds-input" min="1" max="50" value="5">
         <button onclick="startGame()">Start Game</button>
@@ -465,21 +526,23 @@ button[onclick="startGame()"]:hover {
     <!-- Existing content -->
     <button id="toggle-streetview-movement" onclick="toggleStreetViewMovement()">Enable/Disable Movement</button>
     <span id="movement-status" style="color: green;">Movement Enabled</span>
+</div>
 
 
-<span style="color: white; margin-bottom: -20px"><h2>Custom mode - pregenerated locations from a file</h2></span>
-
+<button id="custom-mode-button" class="styled-window" onclick="toggleCustomMode()">Custom Mode - pregenerated locations from a file</button>
+<div id="custom-mode-settings" style="display: none;">
 <div class="styled-window">
     <input type="file" id="file-input" />
     <button onclick="loadGameFromFile()">Load Game from File</button>
 </div>
+</div>
 
 
-<span style="color: white; margin-bottom: -20px"><h2>Editor - create a file with your own locations</h2></span>
-<button id="launch-custom-mode" onclick="launchCustomGenerationMode()">Launch custom mode editor</button>
+<button id="launch-custom-mode"  class="styled-window"  onclick="launchCustomGenerationMode()">Launch custom mode editor</button>
 
 
-<span style="color: white; margin-bottom: -20px"><h2>Online Multiplayer</h2></span>
+<button id="online-multiplayer-button" class="styled-window" onclick="toggleOnlineMultiplayer()">Online Multiplayer</button>
+<div id="online-multiplayer-settings" style="display: none;">
 <input type="text" id="nickname" style="display:none;" placeholder="Enter your nickname">
 
 <div class="styled-window">
@@ -488,7 +551,7 @@ button[onclick="startGame()"]:hover {
 <div id="server-list" style="color:white"></div>
    <div id="server-creation">
     <input type="text" id="server-name" style="display:none" placeholder="Enter server name">
-    <button onclick="createServer()"  class="styled-button">Create Server</button>
+<button onclick="joinOrCreateGame()" class="styled-button">Create / Join Server</button>
 </div>
 </div>
 
@@ -511,13 +574,43 @@ button[onclick="startGame()"]:hover {
         <input type="checkbox" id="enable-movement">
         Enable/Disable Movement
     </label>
+	
+	  <label>
+        <input type="checkbox" id="same-location-for-all">
+        Same location for all players
+    </label>
+	
     <button id="start-multiplayer-game">Start Multiplayer Game</button>
 </div>
 <!-- Add a placeholder for multiplayer game alerts -->
 <div id="multiplayer-alert" style="display: none;"></div>
 
 
-<span style="color: white;">v29.11.2023c, f_otterguessr_a12</span>
+ <div id="multiplayer-setup">
+    <h2>Create a multiplayer game</h2>
+    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
+    <div>
+      <label for="multi-rounds-input">Choose number of rounds (1-50):</label>
+      <input type="number" id="multi-rounds-input" min="1" max="50" value="5">
+    </div>
+    <div>
+      <label for="multi-timer-duration">Set timer duration (10s to 1200s):</label>
+      <input type="number" id="multi-timer-duration" min="10" max="1200" value="120">
+    </div>
+    <div>
+      <label for="multi-enable-movement">Enable/Disable Movement:</label>
+      <input type="checkbox" id="multi-enable-movement" checked>
+    </div>
+	
+	
+  </div>
+<div id="game-start-announcement" style="display: none;">A game is about to start. Get ready for the Otterguessr!</div>
+
+  <!-- Placeholder for multiplayer game alerts -->
+  <div id="multiplayer-alert"></div>
+</div>
+
+<span style="color: white;">v10.12.2023b, f_otterguessr_a14</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
     <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
@@ -543,29 +636,7 @@ button[onclick="startGame()"]:hover {
     </div>
     <div id="custom-map" style="width: 1000px; height: 700px;"></div>
 </div>
- <div id="multiplayer-setup">
-    <h2>Create a multiplayer game</h2>
-    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
-    <div>
-      <label for="multi-rounds-input">Choose number of rounds (1-50):</label>
-      <input type="number" id="multi-rounds-input" min="1" max="50" value="5">
-    </div>
-    <div>
-      <label for="multi-timer-duration">Set timer duration (10s to 1200s):</label>
-      <input type="number" id="multi-timer-duration" min="10" max="1200" value="120">
-    </div>
-    <div>
-      <label for="multi-enable-movement">Enable/Disable Movement:</label>
-      <input type="checkbox" id="multi-enable-movement" checked>
-    </div>
-	
 
-  </div>
-  </div>
-<div id="game-start-announcement" style="display: none;">A game is about to start. Get ready for the Otterguessr!</div>
-
-  <!-- Placeholder for multiplayer game alerts -->
-  <div id="multiplayer-alert"></div>
 
     </div>
     <div id="game-end-screen">
@@ -807,10 +878,14 @@ async function fetchCustomBoundary() {
 
 
 async function fetchStreetView() {
-
     if (!isGameActive) {
         console.log('Game has ended. No new Street View will be fetched.');
         return; // Exit the function if the game is not active
+    }
+
+    // Hide the map at the start of each round on mobile devices
+    if (window.innerWidth <= 768) {
+        document.getElementById('map').style.display = 'none';
     }
 
     if (generatedLocations && generatedLocations.length > currentRound) {
@@ -1067,7 +1142,7 @@ var isGameActive = false; // New variable to track the game state
 
 
 function startGame() {
-  currentRound = 0; 
+    currentRound = 0; 
     isGameActive = true; // Set to true when a new game starts
     roundScores = []; // Reset the round scores for the new game
     if (!generatedLocations || generatedLocations.length === 0) {
@@ -1093,8 +1168,16 @@ function startGame() {
     gameData.totalRounds = totalRounds; // Store total rounds
     gameData.roundLength = timePerRound; // Store round length
     console.log('Total rounds:', gameData.totalRounds, 'Round length:', gameData.roundLength); // Debugging
+
+    // Hide map at the beginning of every round on mobile
+    if (window.innerWidth <= 768) {
+        document.getElementById('close-game-results').style.display = 'none';
+        document.getElementById('map').style.display = 'none';
+    }
+
     fetchStreetView();
 }
+
 
 var roundScores = []; // Global array to store scores for each round
 
@@ -1186,8 +1269,13 @@ async function endGame() {
     document.getElementById('game-results').innerHTML = resultsHtml;
     document.getElementById('score-display').style.display = 'block';
     document.getElementById('game-over').style.display = 'block';
+	    document.getElementById('map').style.display = 'none';
     document.getElementById('game-results').style.display = 'block';
     document.getElementById('total-points').textContent = totalScore;
+	if (window.innerWidth <= 768) {
+        document.getElementById('close-game-results').style.display = 'block';
+    }
+	
     localStorage.setItem('gameInProgress', 'false');
 
     // Save the Street View movement status
@@ -1489,11 +1577,6 @@ function refreshServerList() {
     socket.emit('list_rooms');
 }
 
-socket.on('connect', function() {
-    console.log("Debug: Connected to server via Socket.io");
-    joinOrCreateGame();
-});
-
 socket.on('assigned_nickname', function(data) {
     console.log("Debug: Assigned nickname:", data.nickname);
 });
@@ -1521,6 +1604,7 @@ function joinOrCreateGame() {
         createServer();
     }
 }
+
 
 // Improved Multiplayer Game Data Handling
 socket.on('multiplayer_game_data', function(data) {
@@ -1576,6 +1660,44 @@ function updateRoundNumberDisplay() {
     document.getElementById('total-rounds').textContent = totalRounds;
 }
 
+socket.on('join_room_announcement', function(data) {
+    if (data && data.message) {
+        // Extract room name from the message
+        var roomNameMatch = data.message.match(/joined room (\w+)/);
+        var roomName = roomNameMatch ? roomNameMatch[1] : 'Unknown';
+
+        // Show the alert message
+        var alertMessage = `You've joined ${roomName}.`;
+        alert(alertMessage);
+    } else {
+        console.error('Invalid or missing data in join_room_announcement:', data);
+    }
+});
+
+
+
+socket.on('room_creation_failed', function(data) {
+    if (data && data.message) {
+        var message = data.message;
+        // Extract room name from the message
+        var roomNameMatch = message.match(/Room (.*?) already exists/);
+        var roomName = roomNameMatch ? roomNameMatch[1] : 'Unknown';
+        alert(`Room ${roomName} already exists.`);
+    } else {
+        console.error('Room creation failed for an unknown reason.');
+    }
+});
+
+
+socket.on('join_error', function() {
+    alert("This server doesn't exist.");
+    console.log("Debug: join_error - This server doesn't exist.");
+});
+
+socket.on('room_created', function(data) {
+    alert("You've created server " + data.room + ".");
+    console.log("Debug: room_created - You've created server " + data.room + ".");
+});
 
 socket.on('available_rooms', function(rooms) {
     console.log("Debug: Available rooms:", rooms);
@@ -1585,6 +1707,7 @@ socket.on('available_rooms', function(rooms) {
         if (rooms.hasOwnProperty(room)) {
             var roomElement = document.createElement('div');
             roomElement.textContent = `Room Name: ${room}, Players: ${rooms[room].player_count}`;
+            roomElement.style.color = 'black'; // Set text color to black
             roomElement.style.cursor = 'pointer';
             roomElement.onclick = function() {
                 socket.emit('join', { room: room });
@@ -1594,10 +1717,11 @@ socket.on('available_rooms', function(rooms) {
         }
     }
     if (Object.keys(rooms).length === 0) {
-        serverList.innerHTML = '<p>No available rooms. Create a new one!</p>';
+        serverList.innerHTML = '<p class="no-rooms-message">No available rooms. Create a new one!</p>';
     }
     console.log("Debug: Server list updated");
 });
+
 
 socket.onAny((event, ...args) => {
     console.log(`Debug: Socket.io event received - ${event}`, args);
@@ -1845,6 +1969,49 @@ function toggleMapDisplay() {
 }
 </script>
 
+<script>
+function toggleClassicMode() {
+    var classicModeSettings = document.getElementById('classic-mode-settings');
+    var customModeSettings = document.getElementById('custom-mode-settings');
+    var onlineMultiplayerSettings = document.getElementById('online-multiplayer-settings');
+
+    classicModeSettings.style.display = classicModeSettings.style.display === 'none' ? 'block' : 'none';
+    customModeSettings.style.display = 'none';
+    onlineMultiplayerSettings.style.display = 'none';
+}
+
+function toggleCustomMode() {
+    var classicModeSettings = document.getElementById('classic-mode-settings');
+    var customModeSettings = document.getElementById('custom-mode-settings');
+    var onlineMultiplayerSettings = document.getElementById('online-multiplayer-settings');
+
+    customModeSettings.style.display = customModeSettings.style.display === 'none' ? 'block' : 'none';
+    classicModeSettings.style.display = 'none';
+    onlineMultiplayerSettings.style.display = 'none';
+}
+
+function toggleOnlineMultiplayer() {
+    var classicModeSettings = document.getElementById('classic-mode-settings');
+    var customModeSettings = document.getElementById('custom-mode-settings');
+    var onlineMultiplayerSettings = document.getElementById('online-multiplayer-settings');
+
+    onlineMultiplayerSettings.style.display = onlineMultiplayerSettings.style.display === 'none' ? 'block' : 'none';
+    classicModeSettings.style.display = 'none';
+    customModeSettings.style.display = 'none';
+}
+</script>
+
+<script>
+function closeGameResults() {
+    // Hide the game results container
+    document.getElementById('game-results').style.display = 'none';
+
+    // Hide the close button
+    document.getElementById('close-game-results').style.display = 'none';
+}
+
+</script>
+
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyChOHZaT2T-YnRPTHdamiKhrNuELMGUAUY&callback=initialize"></script>
         <button id="reload-button" style="display:none" onclick="reloadLocation()">reload</button>
 
@@ -1857,7 +2024,10 @@ function toggleMapDisplay() {
     <button id="play-again-button" onclick="restartGame()">Play Again</button>
 
 </div>
-<div id="game-results"></div> <!-- New div for game results -->
+<button id="close-game-results" onclick="closeGameResults()" style="...">Close results</button>
+
+<div id="game-results">
+</div> <!-- New div for game results -->
 
 
 </body>

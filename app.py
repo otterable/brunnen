@@ -11,7 +11,9 @@ logging.basicConfig(level=logging.DEBUG)  # Set the log level
 app = Flask(__name__)
 CORS(app, resources={r"/socket.io/*": {"origins": ["https://otterguessr.ermine.at", "http://localhost:5000"]}})
 app.config['SECRET_KEY'] = 'multiplayerisreal'
-socketio = SocketIO(app, cors_allowed_origins=["https://otterguessr.ermine.at", "http://localhost:5000"], logger=True, engineio_logger=True)
+socketio = SocketIO(app, logger=True, engineio_logger=True, cors_allowed_origins="*")
+
+game_locations = {}
 
 rooms = {}  # Stores room details
 user_rooms = {}  # Maps users to their rooms
@@ -164,13 +166,28 @@ def on_join(data):
         emit('join_room_announcement', {'message': f'{nickname} joined room {room_id}'}, room=room_id)
         print(f"{nickname} joined room {room_id}")
 
+
+def generate_game_locations(num_rounds):
+    locations = []
+    for _ in range(num_rounds):
+        lat, lng = generate_random_coordinates()
+        locations.append({'lat': lat, 'lng': lng})
+    return locations
+    
 @socketio.on('start_game')
 def on_start_game(data):
     room_id = data['room']
+    num_rounds = data.get('numRounds', 5)
+    same_location_for_all = data.get('sameLocationForAll', False)  # Default to False if not specified
+
     if room_id in rooms and rooms[room_id]['users'][request.sid]['admin']:
         rooms[room_id]['game_started'] = True
+        if same_location_for_all:
+            game_locations[room_id] = generate_game_locations(num_rounds)
         emit('game_started', rooms[room_id]['game_settings'], room=room_id)
         print(f"Debug: Game started in room {room_id} with settings {rooms[room_id]['game_settings']}")
+
+
 
 
 
