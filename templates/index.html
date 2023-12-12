@@ -585,7 +585,10 @@ button[onclick="startGame()"]:hover {
 
 <div class="styled-window">
 <div id="server-viewing">
+    <button onclick="refreshServerList()" class="styled-button">Refresh server list</button>
+
     <div id="server-list" style="color:white"></div>
+	
     <div id="server-creation">
         <input type="text" id="server-name" style="display:none" placeholder="Enter server name">
         <button onclick="joinOrCreateGame()" class="styled-button">Create / Join Server</button>
@@ -2164,16 +2167,6 @@ function toggleCustomGenerationMode() {
     var editor = document.getElementById('custom-location-editor');
     editor.style.display = "none";
 }
-
-function refreshServerList() {
-    socket.emit('list_rooms'); // Request the list of available rooms
-}
-
-// Automatically refresh the server list every 5 seconds
-setInterval(refreshServerList, 5000);
-
-// Initial server list refresh
-refreshServerList();
 </script>
 <script>
 function toggleMapDisplay() {
