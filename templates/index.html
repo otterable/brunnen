@@ -271,6 +271,13 @@ margin-bottom: 10px !important;
     text-align: center;
 }
 
+
+@media screen and (min-width: 768px) {
+    #close-game-results {
+	        display: none; /* Hide the button by default */
+}
+}
+
 /* Mobile-specific styles */
 @media screen and (max-width: 768px) {
     #close-game-results {
@@ -568,18 +575,21 @@ button[onclick="startGame()"]:hover {
     <button onclick="pregenerateRounds()">Pregenerate</button>
 </div>
 
+<!-- Loading Overlay for Pregeneration -->
+<div id="loading-pregeneration-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 100; align-items: center; justify-content: center;">
+    <img src="static/wieselspin.gif" alt="Loading...">
+</div>
 
 
 <input type="text" id="nickname" style="display:none;" placeholder="Enter your nickname">
 
 <div class="styled-window">
 <div id="server-viewing">
-    <button onclick="refreshServerList()" class="styled-button">View Servers</button>
-<div id="server-list" style="color:white"></div>
-   <div id="server-creation">
-    <input type="text" id="server-name" style="display:none" placeholder="Enter server name">
-<button onclick="joinOrCreateGame()" class="styled-button">Create / Join Server</button>
-</div>
+    <div id="server-list" style="color:white"></div>
+    <div id="server-creation">
+        <input type="text" id="server-name" style="display:none" placeholder="Enter server name">
+        <button onclick="joinOrCreateGame()" class="styled-button">Create / Join Server</button>
+    </div>
 </div>
 
  </div>
@@ -622,7 +632,7 @@ button[onclick="startGame()"]:hover {
   <!-- Placeholder for multiplayer game alerts -->
   <div id="multiplayer-alert"></div>
   
-  <span style="color: white;">v12.12.2023d, f_otterguessr_a16</span>
+  <span style="color: white;">v12.12.2023e, f_otterguessr_a17</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
     <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
@@ -915,6 +925,9 @@ async function fetchStreetView() {
         return;
     }
     console.log("Fetching Street View for round:", currentRound + 1);
+	if (window.innerWidth > 768) { // Assuming 768px as a breakpoint for desktop devices
+        document.getElementById('map').style.display = 'block';
+    }
     document.getElementById('loading-icon').style.display = 'block';  // Show loading icon
     console.log("Game loading, wieselspin added");
     var sv = new google.maps.StreetViewService();
@@ -1342,21 +1355,24 @@ function restartGame() {
     updateRoundNumberDisplay(); // Reset the round number display
     // Hide game-over and game-results screens
     document.getElementById('game-over').style.display = 'none';
-	
+
     document.getElementById('game-results').style.display = 'none';
     document.getElementById('game-end-screen').style.display = 'none'; // Hide the orange overlay
 
     // Show the black overlay with the OtterGuesser logo
     document.getElementById('loading-screen').style.display = 'flex';
 
-	
     // Make the "Start Game" button and country selector visible
     document.getElementById('rounds-window').style.display = 'block';
     document.getElementById('country-selector').style.display = 'block';
 
     localStorage.setItem('gameInProgress', 'false'); // Update game progress state
     showRoundsWindow(); // Ensure the rounds window is shown correctly
+
+    // Emit the "admin_play_again" event to trigger the action for all players
+    socket.emit('admin_play_again', { room: currentRoomId });
 }
+
 
 
 updateRoundNumberDisplay();
@@ -1674,6 +1690,38 @@ socket.on('scoreboard_update', function(data) {
     }
 });
 
+
+// Add this listener for the "play_again_triggered" event
+socket.on('play_again_triggered', function () {
+    // Handle the "Play Again" action for all players here
+    // You can add your logic for what should happen when the "Play Again" action is triggered
+
+    // For example, you can reset the game state, hide/show elements, etc.
+    // Here's a sample implementation:
+    
+    // Reset the round number display
+    updateRoundNumberDisplay();
+    
+    // Hide game-over and game-results screens
+    document.getElementById('game-over').style.display = 'none';
+    document.getElementById('game-results').style.display = 'none';
+    document.getElementById('game-end-screen').style.display = 'none';
+    
+    // Show the black overlay with the OtterGuesser logo
+    document.getElementById('loading-screen').style.display = 'flex';
+    
+    // Make the "Start Game" button and country selector visible
+    document.getElementById('rounds-window').style.display = 'block';
+    document.getElementById('country-selector').style.display = 'block';
+    
+    // Update game progress state
+    localStorage.setItem('gameInProgress', 'false');
+    
+    // Ensure the rounds window is shown correctly
+    showRoundsWindow();
+});
+
+
 // Add the socket event listener for scoreboard updates
 socket.on('scoreboard_updated', function(data) {
     var scoreboardHtml = '<h3>Scoreboard:</h3><ol>';
@@ -1756,20 +1804,31 @@ function updateRoundNumberDisplay() {
 }
 
 socket.on('join_room_announcement', function(data) {
-      if (data && data.room) {
-        console.log(`You've joined room ${data.room}.`);
-        currentRoomId = data.room; // Set the current room ID when joining
-
-        var roomNameMatch = data.message.match(/joined room (\w+)/);
-        var roomName = roomNameMatch ? roomNameMatch[1] : 'Unknown';
-
-        // Show the alert message
-        var alertMessage = `You've joined ${roomName}.`;
-        alert(alertMessage);
-    } else {
-        console.error('Invalid or missing data in join_room_announcement:', data);
+    // Check if the announcement is for the current user
+    if (socket.id === data.user_id) {
+        alert(data.message); // Show popup only for the user who joined
     }
 });
+
+socket.on('room_created', function(data) {
+    // Check if the server creation message is for the current user
+    if (data && data.message) {
+        alert(data.message); // Show popup with the server creation message
+    }
+});
+
+socket.on('admin_notification', function(data) {
+    if (data.message) {
+        alert(data.message);  // Display the popup message
+    }
+});
+
+socket.on('player_left_announcement', function(data) {
+    if (data.message) {
+        alert(data.message);
+    }
+});
+
 
 
 
@@ -2106,7 +2165,15 @@ function toggleCustomGenerationMode() {
     editor.style.display = "none";
 }
 
+function refreshServerList() {
+    socket.emit('list_rooms'); // Request the list of available rooms
+}
 
+// Automatically refresh the server list every 5 seconds
+setInterval(refreshServerList, 5000);
+
+// Initial server list refresh
+refreshServerList();
 </script>
 <script>
 function toggleMapDisplay() {
@@ -2167,7 +2234,10 @@ function toggleOnlineMultiplayer() {
 var currentRoomId; // Make sure this is initialized somewhere in your code
 
 async function pregenerateRounds() {
+    // Show the loading overlay
+    document.getElementById('loading-pregeneration-overlay').style.display = 'flex';
 
+ 
     var numRounds = parseInt(document.getElementById('pregenerate-rounds-input').value);
     console.debug("SYNDICATION: Locations are being pregenerated.");
     let pregeneratedLocations = [];
@@ -2324,11 +2394,22 @@ socket.on('pregenerating_locations', function(data) {
     console.log(data.message);
 });
 
+// Listen for the 'pregenerated_admin_notification' event
+socket.on('pregenerated_admin_notification', function(data) {
+    var numRounds = data.num_rounds;
+    var message = `${numRounds} locations have been pregenerated. If you want the locations of every round to be the same for each player, choose ${numRounds} rounds. You can also make the game shorter. If you decide to make the game longer, locations past round ${numRounds} will be different for each player.`;
+    alert(message);
+});
+
+
 socket.on('pregenerating_locations_admin', function(data) {
     console.log(data.message);
 });
 
 socket.on('locations_pregenerated', function(data) {
+ // Hide the loading overlay
+    document.getElementById('loading-pregeneration-overlay').style.display = 'none';
+
     console.log('Received data:', data);
 
     if (Array.isArray(data.locations) && data.locations.length > 0) {

@@ -28,8 +28,27 @@ user_scores = {}  # Dictionary to store user scores
 user_nicknames = {}  # Dictionary to store user nicknames
 
 def generate_random_nickname():
-    animals = ["Otter", "Weasel", "Raccoon", "Fox", "Wolf", "Pigeon", "Goat"]
-    return random.choice(animals) + str(random.randint(1000, 9999))
+    animals = [
+    "Molen", "Weasel", "Fennec", "Fox", "Skunk", "Sergal", "Ferret", "BlueJay", "Wushul"]
+    adjectives = [
+    "Fluffy", "Giant", "River", "Cute", "Playful", "Agile", "Swift", "Majestic",
+    "Clever", "Lively", "Elegant", "Graceful", "Joyful", "Friendly", "Gentle",
+    "Happy", "Jolly", "Kind", "Lovely", "Nice", "Pleasant", "Proud", "Silly",
+    "Witty", "Brave", "Calm", "Cozy", "Daring", "Dazzling", "Dreamy", "Dynamic",
+    "Fancy", "Fierce", "Gleaming", "Glorious", "Golden", "Graceful", "Grateful",
+    "Handsome", "Loyal", "Lucky", "Merry", "Mighty", "Peaceful", "Perfect", "Plucky",
+    "Radiant", "Rapid", "Royal", "Shiny", "Sleek", "Smart", "Sparkling", "Speedy",
+    "Spunky", "Starry", "Strong", "Stunning", "Super", "Talented", "Tender",
+    "Terrific", "Valiant", "Vibrant", "Vigorous", "Wise", "Wonderful", "Youthful",
+    "Zany", "Zealous", "Zippy", "Bouncy", "Bright", "Bubbly", "Bursting", "Busy",
+    "Charming", "Cheerful", "Cherished", "Chic", "Classic", "Comical", "Curious",
+    "Dainty", "Delightful", "Elated", "Energetic", "Enthusiastic", "Exquisite",
+    "Fantastic", "Fiery", "Frolicsome", "Giggly", "Gleeful", "Glowing", "Goodly",
+    "Gracious", "Hilarious", "Honest", "Inventive", "Jazzy", "Jovial", "Joyous"]
+
+    adjective = random.choice(adjectives)
+    animal = random.choice(animals)
+    return adjective + animal + str(random.randint(1000, 9999))
 
 @app.route('/')
 def index():
@@ -71,9 +90,11 @@ async def handle_pregenerate_locations(data):
     locations = await pregenerate_locations(num_rounds, selected_country)
     pregenerated_locations[room_id] = locations
 
-    # Broadcasting pregenerated locations to all users in the room
+    # Broadcasting pregenerated locations to all users in the room and a special message to the admin
     emit('locations_pregenerated', {'num_rounds': len(locations), 'locations': locations}, room=room_id)
+    emit('pregenerated_admin_notification', {'num_rounds': len(locations)}, room=request.sid)
     print(f"Debug: Pregenerated {len(locations)} locations for room {room_id}")
+
 
     
     
@@ -135,11 +156,13 @@ def on_create(data):
         }
         user_rooms[user_id] = room_id
         join_room(room_id)
-        emit('room_created', {
-            'message': f'Room {room_id} created successfully.',
-            'room': room_id
-        }, room=room_id)
+
+        # Updated message to include the username of the creator
+        success_message = f"Room {room_id} created successfully. Your username is {nickname}. Share the name of the room with others to let them join!"
+        emit('room_created', {'message': success_message, 'room': room_id}, room=room_id)
+
         print(f"Debug: {nickname} has successfully created server {room_id}")
+
 
 game_round_data = {}  # Add this global variable to track round data
 
@@ -256,9 +279,32 @@ def on_join(data):
         rooms[room_id]['users'][user_id] = {'nickname': nickname, 'admin': False}
         user_rooms[user_id] = room_id
         join_room(room_id)
-        emit('join_room_announcement', {'message': f'{nickname} joined room {room_id}'}, room=room_id)
-        print(f"{nickname} joined room {room_id}")
 
+        # Gather names of all players in the room
+        player_names = [user['nickname'] for user in rooms[room_id]['users'].values()]
+        player_names_str = ', '.join(player_names)
+
+        # Identify the admin's nickname
+        admin_id, admin_nickname = next(((uid, user['nickname']) for uid, user in rooms[room_id]['users'].items() if user['admin']), (None, "Unknown"))
+
+        # Notify the user who just joined
+        emit('join_room_announcement', {
+            'message': f'You ({nickname}) joined room {room_id}. There are now {len(rooms[room_id]["users"])} players in the room. The admin is {admin_nickname}. Players: {player_names_str}',
+            'user_id': user_id
+        }, room=user_id)
+
+        # Notify the admin of the room
+        if admin_id:
+            emit('admin_notification', {
+                'message': f"User {nickname} joined your server {room_id}. There are now {len(rooms[room_id]['users'])} players in your server. Players: {player_names_str}"
+            }, room=admin_id)
+
+
+@socketio.on('admin_play_again')
+def handle_admin_play_again(data):
+    room_id = data['room']
+    emit('play_again_triggered', room=room_id)
+    print(f"Debug: Admin triggered 'Play Again' action in room {room_id}")
 
 def generate_game_locations(num_rounds):
     locations = []
@@ -344,14 +390,22 @@ def on_disconnect():
         nickname = user_nicknames.get(user_id, "Unknown")
 
         if room_id and room_id in rooms:
+            # Remove the user from the room
             del rooms[room_id]['users'][user_id]
             if not rooms[room_id]['users']:
+                # Delete the room if it's empty
                 del rooms[room_id]
                 logger.debug(f"Deleted room {room_id} as it's empty.")
+            else:
+                # Notify other players in the room
+                remaining_players = ', '.join([info['nickname'] for info in rooms[room_id]['users'].values()])
+                player_count = len(rooms[room_id]['users'])
+                admin = next((nick for uid, nick in user_nicknames.items() if uid in rooms[room_id]['users'] and rooms[room_id]['users'][uid]['admin']), "Unknown")
+                emit('player_left_announcement', {'message': f"Player {nickname} left your current server {room_id}. There are {player_count} players left in the server - {remaining_players}.", 'admin': admin, 'player_count': player_count}, room=room_id)
 
             leave_room(room_id)
-            emit('leave_room_announcement', {'message': f'{nickname} left room {room_id}'}, room=room_id)
             logger.debug(f"{nickname} left room {room_id}")
+
 
 
 
