@@ -32,6 +32,9 @@
     cursor: pointer; /* Cursor changes to pointer on hover */
     border-radius: 30px; /* Rounded corners */
 }
+#admin-settings-text {
+    color: white;
+}
 
  #map {
     position: absolute;
@@ -216,6 +219,13 @@ border-radius: 50px;
     color: white;
     font-size: 20px;
     margin: 20px;
+}
+
+
+#timer-duration-label,
+#enable-movement-label,
+#same-location-for-all-label {
+    color: white;
 }
 
 #round-end-button {
@@ -423,6 +433,14 @@ button[onclick="startGame()"] {
     border-radius: 30px;
 }
 
+#rounds-input,
+button[onclick="startGame()"],
+#num-rounds,
+#timer-duration {
+    border-radius: 30px;
+}
+
+
 .no-rooms-message {
     color: black; /* Sets the text color to black */
 }
@@ -543,6 +561,15 @@ button[onclick="startGame()"]:hover {
 
 <button id="online-multiplayer-button" class="styled-window" onclick="toggleOnlineMultiplayer()">Online Multiplayer</button>
 <div id="online-multiplayer-settings" style="display: none;">
+
+<div id="pregenerate-settings" class="styled-window">
+    <label for="pregenerate-rounds-input">Pregenerate Rounds:</label>
+    <input type="number" id="pregenerate-rounds-input" min="1" max="50" value="5">
+    <button onclick="pregenerateRounds()">Pregenerate</button>
+</div>
+
+
+
 <input type="text" id="nickname" style="display:none;" placeholder="Enter your nickname">
 
 <div class="styled-window">
@@ -567,18 +594,19 @@ button[onclick="startGame()"]:hover {
 
 <!-- Additional HTML for Multiplayer Game Creation -->
 <div id="multiplayer-game-creation" style="display: block;">
-    <p>Online Multiplayer - Admin settings</p>
+<p id="admin-settings-text">Online Multiplayer - Admin settings</p>
     <input type="number" id="num-rounds" placeholder="Choose number of rounds (1-50)">
+ <label id="timer-duration-label">
     <input type="number" id="timer-duration" placeholder="Set timer duration (10s to 1200s)">
-    <label>
-        <input type="checkbox" id="enable-movement">
-        Enable/Disable Movement
-    </label>
-	
-	  <label>
-        <input type="checkbox" id="same-location-for-all">
-        Same location for all players
-    </label>
+</label>
+<label id="enable-movement-label">
+    <input type="checkbox" id="enable-movement">
+    Enable/Disable Movement
+</label>
+<label id="same-location-for-all-label">
+    <input type="checkbox" id="same-location-for-all">
+    Same location for all players
+</label>
 	
     <button id="start-multiplayer-game">Start Multiplayer Game</button>
 </div>
@@ -586,21 +614,6 @@ button[onclick="startGame()"]:hover {
 <div id="multiplayer-alert" style="display: none;"></div>
 
 
- <div id="multiplayer-setup">
-    <h2>Create a multiplayer game</h2>
-    <p>Online multiplayer game, where all users are shown the same streetviews every round.</p>
-    <div>
-      <label for="multi-rounds-input">Choose number of rounds (1-50):</label>
-      <input type="number" id="multi-rounds-input" min="1" max="50" value="5">
-    </div>
-    <div>
-      <label for="multi-timer-duration">Set timer duration (10s to 1200s):</label>
-      <input type="number" id="multi-timer-duration" min="10" max="1200" value="120">
-    </div>
-    <div>
-      <label for="multi-enable-movement">Enable/Disable Movement:</label>
-      <input type="checkbox" id="multi-enable-movement" checked>
-    </div>
 	
 	
   </div>
@@ -608,12 +621,14 @@ button[onclick="startGame()"]:hover {
 
   <!-- Placeholder for multiplayer game alerts -->
   <div id="multiplayer-alert"></div>
-</div>
-
-<span style="color: white;">v10.12.2023b, f_otterguessr_a14</span>
+  
+  <span style="color: white;">v12.12.2023d, f_otterguessr_a16</span>
 <a href="https://ko-fi.com/otterable" target="_blank">
     <img height="36" style="border:0px;height:20px; display:none" src="static/donate.png" border="0" alt="Support on Ko-fi" />
 </a>
+</div>
+
+
 
 <div id="custom-location-editor" class="overlay" style="display: none;">
     <span style="color: white;">
@@ -1153,6 +1168,10 @@ function startGame() {
         console.log(`Game started with preloaded locations from file ${gameData.randomFileName}. No file will be generated.`);
         gameData.randomFileName = ''; // Clear the randomFileName to disable file generation
     }
+	
+	if (window.innerWidth > 768) { // Assuming 768px as a breakpoint for desktop devices
+        document.getElementById('map').style.display = 'block';
+    }
     userClickedLocations = []; // Reset user clicked locations for new game
     totalRounds = document.getElementById('rounds-input').value; // Set totalRounds before updating the display
     currentRound = 0; // Reset currentRound to 0
@@ -1283,6 +1302,10 @@ async function endGame() {
     console.log('Game ended with total score: ' + totalScore);
     console.log('Street View movement was ' + (allowStreetViewMovement ? 'enabled' : 'disabled'));
 
+updateScoreboard();
+    console.log('All players have finished playing. SCORES ARE FINAL.');
+
+
     // Save game data to a file if started with randomly generated locations
         if (gameData.randomFileName) {
         gameData.locations = generatedLocations;
@@ -1312,16 +1335,21 @@ window.onload = function() {
     console.log('Page loaded and game initialized.');
 };
 
+
 function restartGame() {
+    socket.emit('reset_scoreboard', { room: currentRoomId });
+
     updateRoundNumberDisplay(); // Reset the round number display
     // Hide game-over and game-results screens
     document.getElementById('game-over').style.display = 'none';
+	
     document.getElementById('game-results').style.display = 'none';
     document.getElementById('game-end-screen').style.display = 'none'; // Hide the orange overlay
 
     // Show the black overlay with the OtterGuesser logo
     document.getElementById('loading-screen').style.display = 'flex';
 
+	
     // Make the "Start Game" button and country selector visible
     document.getElementById('rounds-window').style.display = 'block';
     document.getElementById('country-selector').style.display = 'block';
@@ -1605,6 +1633,68 @@ function joinOrCreateGame() {
     }
 }
 
+socket.on('current_players', function(data) {
+    if (data.room === currentRoomId) {
+        console.log("Debug: Starting new round in multiplayer game, in server " + currentRoomId + ", with players " + data.players.join(", "));
+    }
+});
+
+socket.on('get_current_players', data => {
+    const room = data.room;
+    const players = getPlayersInRoom(room); // Function to retrieve players in the specified room
+    socket.emit('current_players', { room: room, players: players.map(player => player.nickname) });
+});
+
+
+
+// Add the new updateScoreboard function
+function updateScoreboard() {
+    // Emit an event to the server to update the scoreboard with the server identifier
+    socket.emit('update_scoreboard', { score: totalScore, room: currentRoomId });
+
+    // Log for debugging
+    console.log('Scoreboard updated, because player finished playing with score:', totalScore);
+}
+
+socket.on('update_scoreboard', data => {
+    const { score, room } = data;
+    // Logic to update the scoreboard specifically for the room/server
+    const updatedScoreboard = updateServerScoreboard(score, room);
+
+    // Emit the updated scoreboard back to clients in that room
+    io.to(room).emit('scoreboard_updated', { scoreboard: updatedScoreboard });
+});
+
+
+socket.on('scoreboard_update', function(data) {
+    console.log('Scoreboard updated:', data.scoreboard);
+    updateScoreboardDisplay(data.scoreboard);
+    if (data.scoreboard.every(player => player.isFinished)) {
+        console.log("All players have finished playing. SCORES ARE FINAL.");
+    }
+});
+
+// Add the socket event listener for scoreboard updates
+socket.on('scoreboard_updated', function(data) {
+    var scoreboardHtml = '<h3>Scoreboard:</h3><ol>';
+    data.scoreboard.forEach(function(player) {
+        scoreboardHtml += `<li>${player.nickname} - ${player.score} points</li>`;
+    });
+    scoreboardHtml += '</ol>';
+    document.getElementById('multiplayer-scoreboard').innerHTML = scoreboardHtml;
+});
+
+
+
+function updateScoreboardDisplay(scoreboard) {
+    var scoreboardHtml = "<h3>Scoreboard:</h3><ol>";
+    for (var i = 0; i < scoreboard.length; i++) {
+        var player = scoreboard[i];
+        scoreboardHtml += `<li>${player.nickname} - ${player.score} points</li>`;
+    }
+    scoreboardHtml += "</ol>";
+    document.getElementById('multiplayer-scoreboard').innerHTML = scoreboardHtml;
+}
 
 // Improved Multiplayer Game Data Handling
 socket.on('multiplayer_game_data', function(data) {
@@ -1646,7 +1736,10 @@ socket.on('multiplayer_game_data', function(data) {
 });
 
 function startRound(firstRound = false) {
-    console.log("Debug: Starting new round in multiplayer game");
+    console.log("Debug: Starting new round in multiplayer game, in server " + currentRoomId);
+    // Retrieve and log the player list for the current server/room
+    socket.emit('get_current_players', { room: currentRoomId });
+
     isGameActive = true;
     if (!firstRound) {
         currentRound++;
@@ -1655,14 +1748,18 @@ function startRound(firstRound = false) {
     fetchStreetView();
 }
 
+
+
 function updateRoundNumberDisplay() {
     document.getElementById('round-number').textContent = currentRound + 1; // +1 as rounds start at 0
     document.getElementById('total-rounds').textContent = totalRounds;
 }
 
 socket.on('join_room_announcement', function(data) {
-    if (data && data.message) {
-        // Extract room name from the message
+      if (data && data.room) {
+        console.log(`You've joined room ${data.room}.`);
+        currentRoomId = data.room; // Set the current room ID when joining
+
         var roomNameMatch = data.message.match(/joined room (\w+)/);
         var roomName = roomNameMatch ? roomNameMatch[1] : 'Unknown';
 
@@ -1694,32 +1791,89 @@ socket.on('join_error', function() {
     console.log("Debug: join_error - This server doesn't exist.");
 });
 
+// Hide pregenerate settings by default
+document.getElementById('pregenerate-settings').style.display = 'none';
+
 socket.on('room_created', function(data) {
-    alert("You've created server " + data.room + ".");
     console.log("Debug: room_created - You've created server " + data.room + ".");
+    currentRoomId = data.room; // Set the current room ID
+
+    // Since the user who creates the server is always the admin, we do not need to check data.isAdmin
+    // Directly show the pregenerate settings
+    document.getElementById('pregenerate-settings').style.display = 'block';
+    console.log("Debug: User is admin, showing pregenerate settings.");
 });
 
+// Optionally, handle the event when a user joins a room as an admin
+socket.on('joined_as_admin', function(data) {
+    if (data.isAdmin) {
+        document.getElementById('pregenerate-settings').style.display = 'block';
+        console.log("Debug: Joined as admin, showing pregenerate settings.");
+    } else {
+        document.getElementById('pregenerate-settings').style.display = 'none';
+        console.log("Debug: Not joined as admin, hiding pregenerate settings.");
+    }
+});
+
+// Hide multiplayer game creation settings by default
+document.getElementById('multiplayer-game-creation').style.display = 'none';
+
+socket.on('room_created', function(data) {
+    console.log("Debug: room_created - You've created server " + data.room + ".");
+
+    // Show the multiplayer game creation settings for the admin
+    document.getElementById('multiplayer-game-creation').style.display = 'block';
+    console.log("Debug: User is admin, showing multiplayer game creation settings.");
+});
+
+socket.on('joined_as_admin', function(data) {
+    if (data.isAdmin) {
+        // Show multiplayer game creation settings for the admin
+        document.getElementById('multiplayer-game-creation').style.display = 'block';
+        console.log("Debug: Joined as admin, showing multiplayer game creation settings.");
+    } else {
+        // Hide multiplayer game creation settings for non-admin users
+        document.getElementById('multiplayer-game-creation').style.display = 'none';
+        console.log("Debug: Not joined as admin, hiding multiplayer game creation settings.");
+    }
+});
+
+
 socket.on('available_rooms', function(rooms) {
-    console.log("Debug: Available rooms:", rooms);
+    console.log("Available rooms:", rooms);
     var serverList = document.getElementById('server-list');
-    serverList.innerHTML = '';
+    serverList.innerHTML = '';  // Clear existing list
+
     for (var room in rooms) {
         if (rooms.hasOwnProperty(room)) {
             var roomElement = document.createElement('div');
-            roomElement.textContent = `Room Name: ${room}, Players: ${rooms[room].player_count}`;
-            roomElement.style.color = 'black'; // Set text color to black
+            roomElement.innerHTML = `Room Name: ${room}, Players: ${rooms[room].player_count}<br>`;
+            roomElement.style.color = 'black';
+
+            // Add player names and highlight admin
+            rooms[room].players.forEach(player => {
+                var playerElement = document.createElement('span');
+                if (player.admin) {
+                    playerElement.innerHTML = `<span style="color: red;">${player.nickname} (Admin)</span><br>`;
+                } else {
+                    playerElement.textContent = player.nickname + '\n';
+                }
+                roomElement.appendChild(playerElement);
+            });
+
             roomElement.style.cursor = 'pointer';
             roomElement.onclick = function() {
                 socket.emit('join', { room: room });
-                console.log("Debug: Attempting to join room", room);
+                console.log("Attempting to join room", room);
             };
             serverList.appendChild(roomElement);
         }
     }
+
     if (Object.keys(rooms).length === 0) {
         serverList.innerHTML = '<p class="no-rooms-message">No available rooms. Create a new one!</p>';
     }
-    console.log("Debug: Server list updated");
+    console.log("Server list updated");
 });
 
 
@@ -1737,18 +1891,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Inside the function createMultiplayerGame()
 function createMultiplayerGame() {
     var numRounds = document.getElementById('num-rounds').value;
     var timerDuration = document.getElementById('timer-duration').value;
     var enableMovement = document.getElementById('enable-movement').checked;
+    var sameLocationForAll = document.getElementById('same-location-for-all').checked; // Get the checkbox value
+
     var gameSettings = {
         numRounds: numRounds,
         timerDuration: timerDuration,
-        enableMovement: enableMovement
+        enableMovement: enableMovement,
+        sameLocationForAll: sameLocationForAll // Include this in the game settings
     };
-    console.log("Debug: Multiplayer game creation request sent", gameSettings);
+
+    console.log("Debug: Multiplayer game creation request sent with settings:", gameSettings);
     socket.emit('create_multiplayer_game', gameSettings);
 }
+
 
 
 
@@ -2001,6 +2161,197 @@ function toggleOnlineMultiplayer() {
 }
 </script>
 
+
+<script>
+// Assuming currentRoomId is a global variable
+var currentRoomId; // Make sure this is initialized somewhere in your code
+
+async function pregenerateRounds() {
+
+    var numRounds = parseInt(document.getElementById('pregenerate-rounds-input').value);
+    console.debug("SYNDICATION: Locations are being pregenerated.");
+    let pregeneratedLocations = [];
+
+    for (let i = 0; i < numRounds; i++) {
+        let location = await generateLocation();
+        pregeneratedLocations.push(location);
+    }
+
+    // Check if currentRoomId is defined
+     if (!currentRoomId) {
+        console.error("Error: currentRoomId is not defined.");
+        return;
+    }
+
+socket.emit('admin_pregenerated_locations', { room: currentRoomId, locations: pregeneratedLocations });
+
+}
+
+
+// Server Side: Handling the Admin's Emitted Event (Example in Node.js with socket.io)
+socket.on('admin_pregenerated_locations', data => {
+    const { room, locations } = data;
+    // Broadcasting to all clients in the room
+    io.to(room).emit('pregenerated_locations_for_clients', { locations: locations });
+});
+
+
+// Client Side: Listening for Pregenerated Locations
+socket.on('pregenerated_locations_for_clients', data => {
+    if (isAdmin) {
+        console.debug(`SYNDICATION COMPLETE: Locations ${formatLocations(data.locations)} have been pregenerated. The game will consist of ${data.locations.length} rounds.`);
+    } else {
+        console.debug(`SYNDICATION COMPLETE: Locations ${formatLocations(data.locations)} have been pregenerated by the admin, and synchronized with your client. The game will consist of ${data.locations.length} rounds.`);
+    }
+    // Store the locations and use them for the game
+    pregeneratedLocations = data.locations;
+});
+
+// Helper Function to Format Locations for Debug Message
+function formatLocations(locations) {
+    return locations.map(loc => `(${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)})`).join(", ");
+}
+
+
+
+async function generateLocation() {
+    const maxRetries = 20; // Number of retries to find a valid location
+    const searchRadius = [50, 100, 500]; // Search radii in km
+
+    for (let retries = 0; retries < maxRetries; retries++) {
+        var box = selectBoundingBox();
+        var lat = Math.random() * (box.maxLat - box.minLat) + box.minLat;
+        var lng = Math.random() * (box.maxLng - box.minLng) + box.minLng;
+        var latLng = new google.maps.LatLng(lat, lng);
+
+        var isLandAndWaterChecked = await checkLandOrWater(latLng);
+        if (!isLandAndWaterChecked) {
+            console.log('Generated coords found in the sea, retrying...');
+            continue;
+        }
+
+        for (let radius of searchRadius) {
+            var streetViewData = await getStreetViewData(latLng, radius * 1000); // Convert km to meters
+            if (streetViewData) {
+                generatedLocations.push(streetViewData); // Push the location where Street View was found
+                console.log(`Location with Street View found, with lat value ${streetViewData.lat()} and lng value ${streetViewData.lng()}:`, streetViewData);
+                return streetViewData; // Successful generation, exit the function
+            }
+        }
+        console.log('Searching in a wider radius...');
+    }
+    console.log('Failed to generate a valid location after several retries.');
+    return null; // Return null if no valid location is found
+}
+
+async function getStreetViewData(latLng, radius) {
+    return new Promise(resolve => {
+        var sv = new google.maps.StreetViewService();
+        sv.getPanorama({
+            location: latLng,
+            radius: radius,
+            source: google.maps.StreetViewSource.OUTDOOR
+        }, function(data, status) {
+            if (status === google.maps.StreetViewStatus.OK) {
+                resolve(data.location.latLng); // Return the location where Street View was found
+            } else {
+                resolve(null);
+            }
+        });
+    });
+}
+
+
+function selectBoundingBox() {
+    var selectedCountry = document.getElementById('country-selector').value;
+    if (selectedCountry && countryBoundingBoxes[selectedCountry]) {
+        return countryBoundingBoxes[selectedCountry];
+    }
+    return allBoundingBoxes[Math.floor(Math.random() * allBoundingBoxes.length)];
+}
+
+
+async function processStreetViewData(latLng) {
+    var sv = new google.maps.StreetViewService();
+    sv.getPanorama({
+        location: latLng,
+        radius: 50,  // Adjust as needed
+        source: google.maps.StreetViewSource.OUTDOOR
+    }, function(data, status) {
+        if (status === google.maps.StreetViewStatus.OK) {
+            // Logic to handle valid Street View data
+            console.log('Pair for location found at', data.location.latLng);
+            // Emit or broadcast this location to all players
+            emitLocationData(data.location.latLng);
+            startTimer();  // If relevant in multiplayer
+            initMap(data.location.latLng);  // Update the map for all players
+        } else {
+            console.log('No roads nearby, fetching a new panorama...');
+            generateLocation();  // Generate a new location
+        }
+    });
+}
+
+function emitLocationData(latLng) {
+    // Use socket.io to emit this data to all clients
+    socket.emit('new_location_data', { lat: latLng.lat(), lng: latLng.lng() });
+}
+
+
+async function checkStreetViewAvailability(latLng, radius) {
+    return new Promise(resolve => {
+        var sv = new google.maps.StreetViewService();
+        sv.getPanorama({
+            location: latLng,
+            radius: radius,
+            source: google.maps.StreetViewSource.OUTDOOR
+        }, function(data, status) {
+            resolve(status === google.maps.StreetViewStatus.OK);
+        });
+    });
+}
+
+// Attach the event listener
+document.addEventListener('DOMContentLoaded', function() {
+    var pregenerateButton = document.getElementById('pregenerate-rounds-button');
+    if (pregenerateButton) {
+        pregenerateButton.addEventListener('click', pregenerateRounds);
+    }
+});
+
+
+socket.on('pregenerating_locations', function(data) {
+    console.log(data.message);
+});
+
+socket.on('pregenerating_locations_admin', function(data) {
+    console.log(data.message);
+});
+
+socket.on('locations_pregenerated', function(data) {
+    console.log('Received data:', data);
+
+    if (Array.isArray(data.locations) && data.locations.length > 0) {
+        var validLocations = data.locations.filter(loc => loc && typeof loc.lat === 'number' && typeof loc.lng === 'number');
+        
+        if (validLocations.length === 0) {
+            console.error('No valid location data received. All locations are null or invalid.');
+            // Optionally, request the server to regenerate locations
+            socket.emit('request_regenerate_locations');
+        } else {
+            console.log('Valid locations received:', validLocations);
+            // Proceed with game setup using valid locations
+            generatedLocations = validLocations.map(loc => new google.maps.LatLng(loc.lat, loc.lng));
+        }
+    } else {
+        console.error('Invalid location data format received:', data.locations);
+        // Handle invalid data format
+    }
+});
+
+</script>
+
+
 <script>
 function closeGameResults() {
     // Hide the game results container
@@ -2023,8 +2374,15 @@ function closeGameResults() {
     <div id="gameover-map" style="width: 780px; height: 600px; margin-top: 20px;"></div> <!-- New Map Container -->
     <button id="play-again-button" onclick="restartGame()">Play Again</button>
 
-</div>
 <button id="close-game-results" onclick="closeGameResults()" style="...">Close results</button>
+
+<div id="multiplayer-scoreboard"></div>
+
+
+</div>
+
+
+
 
 <div id="game-results">
 </div> <!-- New div for game results -->
