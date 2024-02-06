@@ -7,6 +7,7 @@ import time
 import logging
 import requests
 import asyncio
+from socketio import Namespace
 
 # Basic logging setup
 logging.basicConfig(level=logging.DEBUG)
