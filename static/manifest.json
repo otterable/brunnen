@@ -1,0 +1,15 @@
+{
+  "name": "BrunnenNavi",
+  "short_name": "BrunnenNavi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0000ff",
+  "icons": [
+    {
+      "src": "/static/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
